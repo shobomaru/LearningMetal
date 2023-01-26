@@ -7,22 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		57F391EE297ED92C0027ED7E /* Test2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F391ED297ED92C0027ED7E /* Test2App.swift */; };
-		57F391F0297ED92C0027ED7E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F391EF297ED92C0027ED7E /* ContentView.swift */; };
-		57F391F2297ED92E0027ED7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57F391F1297ED92E0027ED7E /* Assets.xcassets */; };
-		57F391F5297ED92E0027ED7E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57F391F4297ED92E0027ED7E /* Preview Assets.xcassets */; };
+		571920FA29815E86007C605A /* SimpleTriangleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571920F929815E86007C605A /* SimpleTriangleApp.swift */; };
+		571920FC29815E86007C605A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571920FB29815E86007C605A /* ContentView.swift */; };
+		571920FE29815E87007C605A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 571920FD29815E87007C605A /* Assets.xcassets */; };
+		5719210129815E87007C605A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5719210029815E87007C605A /* Preview Assets.xcassets */; };
+		571921082981697B007C605A /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = 571921072981697B007C605A /* Scene.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		57F391EA297ED92C0027ED7E /* Test2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Test2.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		57F391ED297ED92C0027ED7E /* Test2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test2App.swift; sourceTree = "<group>"; };
-		57F391EF297ED92C0027ED7E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		57F391F1297ED92E0027ED7E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		57F391F4297ED92E0027ED7E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		571920F629815E86007C605A /* SimpleTriangle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleTriangle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		571920F929815E86007C605A /* SimpleTriangleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleTriangleApp.swift; sourceTree = "<group>"; };
+		571920FB29815E86007C605A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		571920FD29815E87007C605A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5719210029815E87007C605A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		571921072981697B007C605A /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		57F391E7297ED92C0027ED7E /* Frameworks */ = {
+		571920F329815E86007C605A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -32,37 +34,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		57F391E1297ED92C0027ED7E = {
+		571920ED29815E86007C605A = {
 			isa = PBXGroup;
 			children = (
-				57F391EC297ED92C0027ED7E /* Test2 */,
-				57F391EB297ED92C0027ED7E /* Products */,
+				571920F829815E86007C605A /* SimpleTriangle */,
+				571920F729815E86007C605A /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		57F391EB297ED92C0027ED7E /* Products */ = {
+		571920F729815E86007C605A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				57F391EA297ED92C0027ED7E /* Test2.app */,
+				571920F629815E86007C605A /* SimpleTriangle.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		57F391EC297ED92C0027ED7E /* Test2 */ = {
+		571920F829815E86007C605A /* SimpleTriangle */ = {
 			isa = PBXGroup;
 			children = (
-				57F391ED297ED92C0027ED7E /* Test2App.swift */,
-				57F391EF297ED92C0027ED7E /* ContentView.swift */,
-				57F391F1297ED92E0027ED7E /* Assets.xcassets */,
-				57F391F3297ED92E0027ED7E /* Preview Content */,
+				571920F929815E86007C605A /* SimpleTriangleApp.swift */,
+				571920FB29815E86007C605A /* ContentView.swift */,
+				571920FD29815E87007C605A /* Assets.xcassets */,
+				571920FF29815E87007C605A /* Preview Content */,
+				571921072981697B007C605A /* Scene.metal */,
 			);
-			path = Test2;
+			path = SimpleTriangle;
 			sourceTree = "<group>";
 		};
-		57F391F3297ED92E0027ED7E /* Preview Content */ = {
+		571920FF29815E87007C605A /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				57F391F4297ED92E0027ED7E /* Preview Assets.xcassets */,
+				5719210029815E87007C605A /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -70,39 +73,39 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		57F391E9297ED92C0027ED7E /* Test2 */ = {
+		571920F529815E86007C605A /* SimpleTriangle */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 57F391F8297ED92E0027ED7E /* Build configuration list for PBXNativeTarget "Test2" */;
+			buildConfigurationList = 5719210429815E87007C605A /* Build configuration list for PBXNativeTarget "SimpleTriangle" */;
 			buildPhases = (
-				57F391E6297ED92C0027ED7E /* Sources */,
-				57F391E7297ED92C0027ED7E /* Frameworks */,
-				57F391E8297ED92C0027ED7E /* Resources */,
+				571920F229815E86007C605A /* Sources */,
+				571920F329815E86007C605A /* Frameworks */,
+				571920F429815E86007C605A /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = Test2;
-			productName = Test2;
-			productReference = 57F391EA297ED92C0027ED7E /* Test2.app */;
+			name = SimpleTriangle;
+			productName = SimpleTriangle;
+			productReference = 571920F629815E86007C605A /* SimpleTriangle.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		57F391E2297ED92C0027ED7E /* Project object */ = {
+		571920EE29815E86007C605A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
-					57F391E9297ED92C0027ED7E = {
+					571920F529815E86007C605A = {
 						CreatedOnToolsVersion = 14.2;
 					};
 				};
 			};
-			buildConfigurationList = 57F391E5297ED92C0027ED7E /* Build configuration list for PBXProject "Test2" */;
+			buildConfigurationList = 571920F129815E86007C605A /* Build configuration list for PBXProject "SimpleTriangle" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -110,42 +113,43 @@
 				en,
 				Base,
 			);
-			mainGroup = 57F391E1297ED92C0027ED7E;
-			productRefGroup = 57F391EB297ED92C0027ED7E /* Products */;
+			mainGroup = 571920ED29815E86007C605A;
+			productRefGroup = 571920F729815E86007C605A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				57F391E9297ED92C0027ED7E /* Test2 */,
+				571920F529815E86007C605A /* SimpleTriangle */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		57F391E8297ED92C0027ED7E /* Resources */ = {
+		571920F429815E86007C605A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57F391F5297ED92E0027ED7E /* Preview Assets.xcassets in Resources */,
-				57F391F2297ED92E0027ED7E /* Assets.xcassets in Resources */,
+				5719210129815E87007C605A /* Preview Assets.xcassets in Resources */,
+				571920FE29815E87007C605A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		57F391E6297ED92C0027ED7E /* Sources */ = {
+		571920F229815E86007C605A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57F391F0297ED92C0027ED7E /* ContentView.swift in Sources */,
-				57F391EE297ED92C0027ED7E /* Test2App.swift in Sources */,
+				571920FC29815E86007C605A /* ContentView.swift in Sources */,
+				571920FA29815E86007C605A /* SimpleTriangleApp.swift in Sources */,
+				571921082981697B007C605A /* Scene.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		57F391F6297ED92E0027ED7E /* Debug */ = {
+		5719210229815E87007C605A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -205,7 +209,7 @@
 			};
 			name = Debug;
 		};
-		57F391F7297ED92E0027ED7E /* Release */ = {
+		5719210329815E87007C605A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -259,14 +263,14 @@
 			};
 			name = Release;
 		};
-		57F391F9297ED92E0027ED7E /* Debug */ = {
+		5719210529815E87007C605A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Test2/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SimpleTriangle/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -279,7 +283,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gikotan.Test2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.SimpleTriangle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -287,14 +291,14 @@
 			};
 			name = Debug;
 		};
-		57F391FA297ED92E0027ED7E /* Release */ = {
+		5719210629815E87007C605A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Test2/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SimpleTriangle/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -307,7 +311,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gikotan.Test2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.SimpleTriangle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -318,25 +322,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		57F391E5297ED92C0027ED7E /* Build configuration list for PBXProject "Test2" */ = {
+		571920F129815E86007C605A /* Build configuration list for PBXProject "SimpleTriangle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				57F391F6297ED92E0027ED7E /* Debug */,
-				57F391F7297ED92E0027ED7E /* Release */,
+				5719210229815E87007C605A /* Debug */,
+				5719210329815E87007C605A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		57F391F8297ED92E0027ED7E /* Build configuration list for PBXNativeTarget "Test2" */ = {
+		5719210429815E87007C605A /* Build configuration list for PBXNativeTarget "SimpleTriangle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				57F391F9297ED92E0027ED7E /* Debug */,
-				57F391FA297ED92E0027ED7E /* Release */,
+				5719210529815E87007C605A /* Debug */,
+				5719210629815E87007C605A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 57F391E2297ED92C0027ED7E /* Project object */;
+	rootObject = 571920EE29815E86007C605A /* Project object */;
 }

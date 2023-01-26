@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Test2
-//
-//  Created by ec2-user on 1/23/23.
-//
-
 import SwiftUI
 import MetalKit
 
@@ -59,3 +52,4 @@ class Metal: NSObject, MTKViewDelegate {
         cmdBuf.commit()
     }
 }
+
