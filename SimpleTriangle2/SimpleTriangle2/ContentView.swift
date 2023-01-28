@@ -2,12 +2,27 @@ import SwiftUI
 import MetalKit
 import simd
 
-struct ContentView: UIViewRepresentable {
+struct ContentView: View {
+    @State private var message = "default"
+    @State private var isShowAlert = false
+    var body: some View {
+        VStack {
+            ContentView2(message: $message, isShowAlert: $isShowAlert)
+                .alert(isPresented: $isShowAlert) { () -> Alert in
+                    return Alert(title: Text("Error"), message: Text(message))
+                }
+        }
+    }
+}
+
+struct ContentView2: UIViewRepresentable {
     typealias Coordinator = Metal
+    @Binding fileprivate var message: String
+    @Binding fileprivate var isShowAlert: Bool
     func makeCoordinator() -> Coordinator {
         Metal(self)
     }
-    func makeUIView(context: UIViewRepresentableContext<ContentView>) -> MTKView {
+    func makeUIView(context: UIViewRepresentableContext<ContentView2>) -> MTKView {
         let v = MTKView()
         v.delegate = context.coordinator
         guard let dev = MTLCreateSystemDefaultDevice() else { fatalError() }
@@ -80,20 +95,28 @@ let SPHERE_STACKS: Int = 10
 let SPHERE_SLICES: Int = 12
 
 class Metal: NSObject, MTKViewDelegate {
-    var parent: ContentView
+    var parent: ContentView2
     var frameCount: UInt64 = 0
     var sema = DispatchSemaphore(value: 2) // double buffer
     var device: MTLDevice
     var cmdQueue: MTLCommandQueue
-    var pso: MTLRenderPipelineState
+    var pso: MTLRenderPipelineState?
     var vb: MTLBuffer
     var ib: MTLBuffer
     var cbScene: [MTLBuffer]
     var depthTex: MTLTexture?
     var depthState: MTLDepthStencilState
-    init(_ parent: ContentView) {
+    init(_ parent: ContentView2) {
         self.parent = parent
         self.device = MTLCreateSystemDefaultDevice()!
+        #if !targetEnvironment(simulator)
+        if !device.supportsFamily(.metal3) {
+            DispatchQueue.main.async {
+                parent.message = "Metal3 GPU family needed";
+                parent.isShowAlert = true
+            }
+        }
+        #endif
         self.cmdQueue = self.device.makeCommandQueue()!
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let vs = lib.makeFunction(name: "sceneVS") else { fatalError() }
@@ -117,7 +140,6 @@ class Metal: NSObject, MTKViewDelegate {
             self.pso = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
-            fatalError()
         }
         // Create a sphere
         var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
@@ -165,6 +187,7 @@ class Metal: NSObject, MTKViewDelegate {
         self.depthTex = self.device.makeTexture(descriptor: texDesc)
     }
     func draw(in view: MTKView) {
+        if (self.pso == nil) { return }
         guard let currentDrawable = view.currentDrawable else { return }
         sema.wait()
         self.frameCount += 1
@@ -200,7 +223,7 @@ class Metal: NSObject, MTKViewDelegate {
         passDesc.depthAttachment.storeAction = .dontCare
         passDesc.depthAttachment.texture = self.depthTex
         let enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
-        enc.setRenderPipelineState(self.pso)
+        enc.setRenderPipelineState(self.pso!)
         enc.setCullMode(.back)
         enc.setDepthStencilState(self.depthState)
         enc.setVertexBuffer(self.vb, offset: 0, index: 0)
