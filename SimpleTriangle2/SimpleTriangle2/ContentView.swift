@@ -27,9 +27,36 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
+struct MathUtil {
+    static func lookAt(pos: simd_float3, target: simd_float3, up: simd_float3) -> float4x4 {
+        let dir = normalize(target - pos)
+        let x = normalize(cross(up, dir))
+        let y = cross(dir, x)
+        let d0 = dot(-pos, x)
+        let d1 = dot(-pos, y)
+        let d2 = dot(-pos, dir)
+        return float4x4.init(columns: (SIMD4(x.x, y.x, dir.x, 0),
+                                SIMD4(x.y, y.y, dir.y, 0),
+                                SIMD4(x.z, y.z, dir.z, 0),
+                                SIMD4(d0, d1, d2, 1)))
+    }
+    static func perspective(fov: Float, aspect: Float, near: Float, far: Float) -> float4x4 {
+        let h = 1 / tan(0.5 * fov)
+        let z = far / (far - near)
+        return float4x4.init(columns: (SIMD4(h / aspect, 0, 0, 0),
+                                SIMD4(0, h, 0, 0),
+                                SIMD4(0, 0, z, 1),
+                                SIMD4(0, 0, -z * near, 0)))
+    }
+}
+
 struct VertexElement {
     var position: MTLPackedFloat3
     var normal: MTLPackedFloat3
+    init(_ position: MTLPackedFloat3, _ normal: MTLPackedFloat3) {
+        self.position = position
+        self.normal = normal
+    }
 };
 
 struct QuadIndexList {
@@ -39,6 +66,14 @@ struct QuadIndexList {
     var v3: UInt16
     var v4: UInt16
     var v5: UInt16
+    init(_ v0: UInt16, _ v1: UInt16, _ v2: UInt16, _ v3: UInt16, _ v4: UInt16, _ v5: UInt16) {
+        self.v0 = v0
+        self.v1 = v1
+        self.v2 = v2
+        self.v3 = v3
+        self.v4 = v4
+        self.v5 = v5
+    }
 };
 
 let SPHERE_STACKS: Int = 10
@@ -97,7 +132,7 @@ class Metal: NSObject, MTKViewDelegate {
                 let pos = MTLPackedFloat3Make(sin(phi) * sin(theta), cos(phi), sin(phi) * cos(theta))
                 let r = Float(1.0)
                 let norm = MTLPackedFloat3Make(pos.x / r, pos.y / r, pos.z / r)
-                vbData.append(VertexElement(position: pos, normal: norm))
+                vbData.append(VertexElement(pos, norm))
             }
         }
         self.vb = device.makeBuffer(bytes: vbData, length: MemoryLayout<VertexElement>.size * vbData.count, options: .cpuCacheModeWriteCombined)!
@@ -108,7 +143,7 @@ class Metal: NSObject, MTKViewDelegate {
             for x in 0..<SPHERE_SLICES {
                 let b = UInt16(y * (SPHERE_SLICES + 1) + x)
                 let s = UInt16(SPHERE_SLICES + 1)
-                ibData.append(QuadIndexList(v0: b, v1: b + s, v2: b + 1, v3: b + s, v4: b + s + 1, v5: b + 1))
+                ibData.append(QuadIndexList(b, b + s, b + 1, b + s, b + s + 1, b + 1))
             }
         }
         self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: .cpuCacheModeWriteCombined)!
@@ -135,11 +170,25 @@ class Metal: NSObject, MTKViewDelegate {
         self.frameCount += 1
         let frameIndex = Int(self.frameCount % 2)
         
-        let cbSceneData: [Float] = [0.2, 0.0, 0.0, 0.0,
-                                    0.0, 0.2, 0.0, 0.0,
-                                    0.0, 0.0, 0.2, 0.0,
-                                    0.0, 0.0, 0.0, 1.0]
-        self.cbScene[frameIndex].contents().copyMemory(from: cbSceneData, byteCount: 64)
+        let cameraPos = simd_float3(0, 4, -4)
+        let cameraTarget = simd_float3(0, 0, 0)
+        let cameraUp = simd_float3(0, 1, 0)
+        let cameraFov = 45.0 * Float.pi / 180.0
+        let cameraNear: Float = 0.01
+        let cameraFar: Float = 100.0
+        
+        let viewMat = MathUtil.lookAt(pos: cameraPos, target: cameraTarget, up: cameraUp)
+        let projMat = MathUtil.perspective(fov: cameraFov, aspect: Float(view.drawableSize.width / view.drawableSize.height), near: cameraFar, far: cameraNear)
+        
+        struct CBScene {
+            let viewProj: float4x4
+            init(_ viewProj: float4x4) {
+                self.viewProj = viewProj
+            }
+        };
+        let test = matrix_multiply(viewMat.transpose, projMat.transpose)
+        var sceneData = CBScene(test)
+        self.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
         
         let cmdBuf = self.cmdQueue.makeCommandBuffer()!
         let passDesc = view.currentRenderPassDescriptor!
