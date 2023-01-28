@@ -34,6 +34,12 @@ struct ContentView2: UIViewRepresentable {
     func updateUIView(_ uiView: MTKView, context: Context) {
         //
     }
+    func enqueueAlert(_ message: String) {
+        Task { @MainActor in
+            self.message = message;
+            self.isShowAlert = true
+        }
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -111,10 +117,7 @@ class Metal: NSObject, MTKViewDelegate {
         self.device = MTLCreateSystemDefaultDevice()!
         #if !targetEnvironment(simulator)
         if !device.supportsFamily(.metal3) {
-            DispatchQueue.main.async {
-                parent.message = "Metal3 GPU family needed";
-                parent.isShowAlert = true
-            }
+            parent.enqueueAlert("Metal3 GPU family needed")
         }
         #endif
         self.cmdQueue = self.device.makeCommandQueue()!
@@ -140,6 +143,7 @@ class Metal: NSObject, MTKViewDelegate {
             self.pso = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
+            parent.enqueueAlert(String(describing: e))
         }
         // Create a sphere
         var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
@@ -205,12 +209,9 @@ class Metal: NSObject, MTKViewDelegate {
         
         struct CBScene {
             let viewProj: float4x4
-            init(_ viewProj: float4x4) {
-                self.viewProj = viewProj
-            }
         };
-        let test = matrix_multiply(viewMat.transpose, projMat.transpose)
-        var sceneData = CBScene(test)
+        let viewProj = viewMat.transpose * projMat.transpose
+        var sceneData = CBScene(viewProj: viewProj)
         self.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
         
         let cmdBuf = self.cmdQueue.makeCommandBuffer()!
@@ -223,6 +224,7 @@ class Metal: NSObject, MTKViewDelegate {
         passDesc.depthAttachment.storeAction = .dontCare
         passDesc.depthAttachment.texture = self.depthTex
         let enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
+        enc.label = "Scene Pass"
         enc.setRenderPipelineState(self.pso!)
         enc.setCullMode(.back)
         enc.setDepthStencilState(self.depthState)
