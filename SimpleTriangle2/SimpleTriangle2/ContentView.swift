@@ -15,14 +15,20 @@ struct ContentView: View {
     }
 }
 
-struct ContentView2: UIViewRepresentable {
+#if os(iOS)
+typealias MyViewRepresentable = UIViewRepresentable
+#else
+typealias MyViewRepresentable = NSViewRepresentable
+#endif
+struct ContentView2: MyViewRepresentable {
+    typealias NSViewType = MTKView
     typealias Coordinator = Metal
     @Binding fileprivate var message: String
     @Binding fileprivate var isShowAlert: Bool
     func makeCoordinator() -> Coordinator {
         Metal(self)
     }
-    func makeUIView(context: UIViewRepresentableContext<ContentView2>) -> MTKView {
+    private func makeView(context: Context) -> MTKView {
         let v = MTKView()
         v.delegate = context.coordinator
         guard let dev = MTLCreateSystemDefaultDevice() else { fatalError() }
@@ -31,15 +37,27 @@ struct ContentView2: UIViewRepresentable {
         v.drawableSize = v.frame.size
         return v
     }
-    func updateUIView(_ uiView: MTKView, context: Context) {
-        //
-    }
     func enqueueAlert(_ message: String) {
         Task { @MainActor in
             self.message = message;
             self.isShowAlert = true
         }
     }
+    #if os(iOS)
+    func makeUIView(context: Context) -> MTKView {
+        makeView(context: context)
+    }
+    func updateUIView(_ uiView: MTKView, context: Context) {
+        //
+    }
+    #else
+    func makeNSView(context: Context) -> MTKView {
+        makeView(context: context)
+    }
+    func updateNSView(_ nsView: MTKView, context: Context) {
+        //
+    }
+    #endif
 }
 
 struct ContentView_Previews: PreviewProvider {
