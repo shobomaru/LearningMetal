@@ -136,6 +136,8 @@ class MyResource {
     var pso: MTLRenderPipelineState?
     var vb: MTLBuffer
     var ib: MTLBuffer
+    var vbPlane: MTLBuffer
+    var ibPlane: MTLBuffer
     var cbScene: [MTLBuffer]
     var zTex: MTLTexture?
     var depthState: MTLDepthStencilState
@@ -192,6 +194,20 @@ class MyResource {
             }
         }
         self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: .cpuCacheModeWriteCombined)!
+        
+        // Create a plane
+        let vbPlaneData: [VertexElement] = [
+            VertexElement(MTLPackedFloat3Make(-1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+            VertexElement(MTLPackedFloat3Make( 1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+            VertexElement(MTLPackedFloat3Make(-1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+            VertexElement(MTLPackedFloat3Make( 1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+        ]
+        self.vbPlane = device.makeBuffer(bytes: vbPlaneData, length: MemoryLayout<VertexElement>.size * vbPlaneData.count, options: .cpuCacheModeWriteCombined)!
+        let ibPlaneData: [QuadIndexList] = [
+            QuadIndexList(0, 1, 2, 2, 1, 3)
+        ]
+        self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
+        
         self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 64, options: .cpuCacheModeWriteCombined)!, count: 2)
         
         let dsDesc = MTLDepthStencilDescriptor()
@@ -273,6 +289,8 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
         enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
+        enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
+        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)
         enc.endEncoding()
         cmdBuf.present(currentDrawable)
         cmdBuf.addCompletedHandler {[weak self] _ in
