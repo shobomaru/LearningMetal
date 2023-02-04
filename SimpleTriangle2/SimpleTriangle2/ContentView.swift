@@ -96,7 +96,7 @@ struct VertexElement {
         self.position = position
         self.normal = normal
     }
-};
+}
 
 struct QuadIndexList {
     var v0: UInt16
@@ -113,32 +113,33 @@ struct QuadIndexList {
         self.v4 = v4
         self.v5 = v5
     }
-};
+}
 
-let SPHERE_STACKS: Int = 10
-let SPHERE_SLICES: Int = 12
+class MyScene {
+    var cameraPos: simd_float3
+    var cameraTarget: simd_float3
+    var cameraUp: simd_float3
+    var cameraFov: Float
+    var cameraNear: Float
+    var cameraFar: Float
+    init() {
+        cameraPos = simd_float3(0, 4, -4)
+        cameraTarget = simd_float3(0, 0, 0)
+        cameraUp = simd_float3(0, 1, 0)
+        cameraFov = 45.0 * Float.pi / 180.0
+        cameraNear = 0.01
+        cameraFar = 100.0
+    }
+}
 
-class Metal: NSObject, MTKViewDelegate {
-    var parent: ContentView2
-    var frameCount: UInt64 = 0
-    var sema = DispatchSemaphore(value: 2) // double buffer
-    var device: MTLDevice
-    var cmdQueue: MTLCommandQueue
+class MyResource {
     var pso: MTLRenderPipelineState?
     var vb: MTLBuffer
     var ib: MTLBuffer
     var cbScene: [MTLBuffer]
-    var depthTex: MTLTexture?
+    var zTex: MTLTexture?
     var depthState: MTLDepthStencilState
-    init(_ parent: ContentView2) {
-        self.parent = parent
-        self.device = MTLCreateSystemDefaultDevice()!
-        #if !targetEnvironment(simulator)
-        if !device.supportsFamily(.metal3) {
-            parent.enqueueAlert("Metal3 GPU family needed")
-        }
-        #endif
-        self.cmdQueue = self.device.makeCommandQueue()!
+    init(device: MTLDevice, alert: (String) -> Void) {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let vs = lib.makeFunction(name: "sceneVS") else { fatalError() }
         guard let fs = lib.makeFunction(name: "sceneFS") else { fatalError() }
@@ -161,7 +162,7 @@ class Metal: NSObject, MTKViewDelegate {
             self.pso = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
-            parent.enqueueAlert(String(describing: e))
+            alert(String(describing: e))
         }
         // Create a sphere
         var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
@@ -198,6 +199,36 @@ class Metal: NSObject, MTKViewDelegate {
         dsDesc.isDepthWriteEnabled = true
         self.depthState = device.makeDepthStencilState(descriptor: dsDesc)!
     }
+    func available() -> Bool {
+        self.pso != nil
+    }
+}
+
+let SPHERE_STACKS: Int = 10
+let SPHERE_SLICES: Int = 12
+
+class Metal: NSObject, MTKViewDelegate {
+    var parent: ContentView2
+    var frameCount: UInt64 = 0
+    var sema = DispatchSemaphore(value: 2) // double buffer
+    var device: MTLDevice
+    var cmdQueue: MTLCommandQueue
+    var scene: MyScene
+    var resource: MyResource
+    init(_ parent: ContentView2) {
+        self.parent = parent
+        self.device = MTLCreateSystemDefaultDevice()!
+        #if !targetEnvironment(simulator)
+        if !device.supportsFamily(.metal3) {
+            parent.enqueueAlert("Metal3 GPU family needed")
+        }
+        #endif
+        self.cmdQueue = self.device.makeCommandQueue()!
+        self.resource = MyResource(device: device, alert: { (s: String) -> Void  in
+            parent.enqueueAlert(s)
+        })
+        self.scene = MyScene()
+    }
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         let texDesc = MTLTextureDescriptor()
         texDesc.width = Int(size.width)
@@ -206,31 +237,24 @@ class Metal: NSObject, MTKViewDelegate {
         texDesc.storageMode = .private //.memoryless
         texDesc.pixelFormat = .depth32Float
         texDesc.usage = [.renderTarget]
-        self.depthTex = self.device.makeTexture(descriptor: texDesc)
+        self.resource.zTex = self.device.makeTexture(descriptor: texDesc)
     }
     func draw(in view: MTKView) {
-        if (self.pso == nil) { return }
+        if (!self.resource.available()) { return }
         guard let currentDrawable = view.currentDrawable else { return }
         sema.wait()
         self.frameCount += 1
         let frameIndex = Int(self.frameCount % 2)
         
-        let cameraPos = simd_float3(0, 4, -4)
-        let cameraTarget = simd_float3(0, 0, 0)
-        let cameraUp = simd_float3(0, 1, 0)
-        let cameraFov = 45.0 * Float.pi / 180.0
-        let cameraNear: Float = 0.01
-        let cameraFar: Float = 100.0
-        
-        let viewMat = MathUtil.lookAt(pos: cameraPos, target: cameraTarget, up: cameraUp)
-        let projMat = MathUtil.perspective(fov: cameraFov, aspect: Float(view.drawableSize.width / view.drawableSize.height), near: cameraFar, far: cameraNear)
+        let viewMat = MathUtil.lookAt(pos: self.scene.cameraPos, target: self.scene.cameraTarget, up: self.scene.cameraUp)
+        let projMat = MathUtil.perspective(fov: self.scene.cameraFov, aspect: Float(view.drawableSize.width / view.drawableSize.height), near: self.scene.cameraFar, far: self.scene.cameraNear)
         
         struct CBScene {
             let viewProj: float4x4
         };
         let viewProj = viewMat.transpose * projMat.transpose
         var sceneData = CBScene(viewProj: viewProj)
-        self.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
+        self.resource.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
         
         let cmdBuf = self.cmdQueue.makeCommandBuffer()!
         let passDesc = view.currentRenderPassDescriptor!
@@ -240,15 +264,15 @@ class Metal: NSObject, MTKViewDelegate {
         passDesc.depthAttachment.clearDepth = 0.0
         passDesc.depthAttachment.loadAction = .clear
         passDesc.depthAttachment.storeAction = .dontCare
-        passDesc.depthAttachment.texture = self.depthTex
+        passDesc.depthAttachment.texture = self.resource.zTex
         let enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
         enc.label = "Scene Pass"
-        enc.setRenderPipelineState(self.pso!)
+        enc.setRenderPipelineState(self.resource.pso!)
         enc.setCullMode(.back)
-        enc.setDepthStencilState(self.depthState)
-        enc.setVertexBuffer(self.vb, offset: 0, index: 0)
-        enc.setVertexBuffer(self.cbScene[frameIndex], offset: 0, index: 1)
-        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.ib, indexBufferOffset: 0, instanceCount: 1)
+        enc.setDepthStencilState(self.resource.depthState)
+        enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
+        enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
+        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
         enc.endEncoding()
         cmdBuf.present(currentDrawable)
         cmdBuf.addCompletedHandler {[weak self] _ in
