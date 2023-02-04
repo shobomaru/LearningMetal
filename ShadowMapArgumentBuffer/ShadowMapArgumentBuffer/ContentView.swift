@@ -368,20 +368,19 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setDepthStencilState(self.resource.depthState)
         enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
         // set arguments
-        let useMetal3 = true
-        if useMetal3 {
-            var argScene = SceneMetalArgs(cbScene: self.resource.cbScene[frameIndex].gpuAddress, shadowMap: self.resource.shadowTex.gpuResourceID, shadowSS: self.resource.shadowSS.gpuResourceID)
-            self.resource.argScene[frameIndex].contents().copyMemory(from: withUnsafePointer(to: &argScene) { UnsafeRawPointer($0) }, byteCount: MemoryLayout<SceneMetalArgs>.size)
-        }
-        else {
-            // Validation layer may works more strictly
-            let ae = self.device.makeDefaultLibrary()!.makeFunction(name: "sceneVS")!.makeArgumentEncoder(bufferIndex: 1)
-            assert(ae.encodedLength == 24)
-            ae.setArgumentBuffer(self.resource.argScene[frameIndex], offset: 0)
-            ae.setBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 0)
-            ae.setTexture(self.resource.shadowTex, index: 1)
-            ae.setSamplerState(self.resource.shadowSS, index: 2)
-        }
+        #if true
+        // Metal3: No function reflection needed
+        var argScene = SceneMetalArgs(cbScene: self.resource.cbScene[frameIndex].gpuAddress, shadowMap: self.resource.shadowTex.gpuResourceID, shadowSS: self.resource.shadowSS.gpuResourceID)
+        self.resource.argScene[frameIndex].contents().copyMemory(from: withUnsafePointer(to: &argScene) { UnsafeRawPointer($0) }, byteCount: MemoryLayout<SceneMetalArgs>.size)
+        #else
+        // Metal2: Validation layer may works more strictly
+        let ae = self.device.makeDefaultLibrary()!.makeFunction(name: "sceneVS")!.makeArgumentEncoder(bufferIndex: 1)
+        assert(ae.encodedLength == 24)
+        ae.setArgumentBuffer(self.resource.argScene[frameIndex], offset: 0)
+        ae.setBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 0)
+        ae.setTexture(self.resource.shadowTex, index: 1)
+        ae.setSamplerState(self.resource.shadowSS, index: 2)
+        #endif
         enc.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, index: 1)
         enc.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, index: 1)
         // declare using
