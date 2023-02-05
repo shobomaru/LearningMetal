@@ -13,7 +13,6 @@
 		B0BEAC76298EB1CE007705CB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0BEAC75298EB1CE007705CB /* Preview Assets.xcassets */; };
 		B0BEAC7D298EB1F5007705CB /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC7C298EB1F5007705CB /* Scene.metal */; };
 		B0BEAC7F298EB21F007705CB /* Shadow.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC7E298EB21F007705CB /* Shadow.metal */; };
-		B0BEAC81298EB23B007705CB /* GpuCommandBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC80298EB23B007705CB /* GpuCommandBuffer.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,7 +23,6 @@
 		B0BEAC75298EB1CE007705CB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B0BEAC7C298EB1F5007705CB /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
 		B0BEAC7E298EB21F007705CB /* Shadow.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shadow.metal; sourceTree = "<group>"; };
-		B0BEAC80298EB23B007705CB /* GpuCommandBuffer.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GpuCommandBuffer.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,7 +61,6 @@
 				B0BEAC74298EB1CE007705CB /* Preview Content */,
 				B0BEAC7C298EB1F5007705CB /* Scene.metal */,
 				B0BEAC7E298EB21F007705CB /* Shadow.metal */,
-				B0BEAC80298EB23B007705CB /* GpuCommandBuffer.metal */,
 			);
 			path = ShadowMapGpuCommandBuffer;
 			sourceTree = "<group>";
@@ -146,7 +143,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0BEAC81298EB23B007705CB /* GpuCommandBuffer.metal in Sources */,
 				B0BEAC71298EB1CD007705CB /* ContentView.swift in Sources */,
 				B0BEAC6F298EB1CD007705CB /* ShadowMapGpuCommandBufferApp.swift in Sources */,
 				B0BEAC7D298EB1F5007705CB /* Scene.metal in Sources */,
