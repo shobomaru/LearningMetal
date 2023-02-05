@@ -446,7 +446,8 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setCullMode(.back)
         enc.setDepthStencilState(self.resource.depthState)
         // declare using
-        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .vertex)
+        // DO NOT FORGET ALL RESOURCE BOUNDS, OR YOU WILL GET INVALID RESOURCES ONLY IN THE METAL GPU DEBUGGER!!!
+        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex, self.resource.argScene[frameIndex]], usage: .read, stages: .vertex)
         //enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .fragment) // need this?
         // No bindings here, already done by GPU
         enc.executeCommandsInBuffer(icb, range: 0..<icbSize)
