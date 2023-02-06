@@ -7,26 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B0BEAC6F298EB1CD007705CB /* ShadowMapGpuCommandBufferApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC6E298EB1CD007705CB /* ShadowMapGpuCommandBufferApp.swift */; };
-		B0BEAC71298EB1CD007705CB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC70298EB1CD007705CB /* ContentView.swift */; };
-		B0BEAC73298EB1CE007705CB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0BEAC72298EB1CE007705CB /* Assets.xcassets */; };
-		B0BEAC76298EB1CE007705CB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0BEAC75298EB1CE007705CB /* Preview Assets.xcassets */; };
-		B0BEAC7D298EB1F5007705CB /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC7C298EB1F5007705CB /* Scene.metal */; };
-		B0BEAC7F298EB21F007705CB /* Shadow.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0BEAC7E298EB21F007705CB /* Shadow.metal */; };
+		B00F2E1C2990217300AAEEFF /* ShadowMapManualTrackingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F2E1B2990217300AAEEFF /* ShadowMapManualTrackingApp.swift */; };
+		B00F2E1E2990217300AAEEFF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F2E1D2990217300AAEEFF /* ContentView.swift */; };
+		B00F2E202990217300AAEEFF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00F2E1F2990217300AAEEFF /* Assets.xcassets */; };
+		B00F2E232990217300AAEEFF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00F2E222990217300AAEEFF /* Preview Assets.xcassets */; };
+		B00F2E2A299021B200AAEEFF /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B00F2E29299021B200AAEEFF /* Scene.metal */; };
+		B00F2E2C299021B900AAEEFF /* Shadow.metal in Sources */ = {isa = PBXBuildFile; fileRef = B00F2E2B299021B900AAEEFF /* Shadow.metal */; };
+		B00F2E2E299021C600AAEEFF /* GpuCommandBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = B00F2E2D299021C600AAEEFF /* GpuCommandBuffer.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B0BEAC6B298EB1CD007705CB /* ShadowMapGpuCommandBuffer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShadowMapGpuCommandBuffer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B0BEAC6E298EB1CD007705CB /* ShadowMapGpuCommandBufferApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowMapGpuCommandBufferApp.swift; sourceTree = "<group>"; };
-		B0BEAC70298EB1CD007705CB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B0BEAC72298EB1CE007705CB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B0BEAC75298EB1CE007705CB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		B0BEAC7C298EB1F5007705CB /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
-		B0BEAC7E298EB21F007705CB /* Shadow.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shadow.metal; sourceTree = "<group>"; };
+		B00F2E182990217300AAEEFF /* ShadowMapManualTracking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShadowMapManualTracking.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B00F2E1B2990217300AAEEFF /* ShadowMapManualTrackingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowMapManualTrackingApp.swift; sourceTree = "<group>"; };
+		B00F2E1D2990217300AAEEFF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B00F2E1F2990217300AAEEFF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B00F2E222990217300AAEEFF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B00F2E29299021B200AAEEFF /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
+		B00F2E2B299021B900AAEEFF /* Shadow.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shadow.metal; sourceTree = "<group>"; };
+		B00F2E2D299021C600AAEEFF /* GpuCommandBuffer.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GpuCommandBuffer.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B0BEAC68298EB1CD007705CB /* Frameworks */ = {
+		B00F2E152990217300AAEEFF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -36,39 +38,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B0BEAC62298EB1CD007705CB = {
+		B00F2E0F2990217300AAEEFF = {
 			isa = PBXGroup;
 			children = (
-				B0BEAC6D298EB1CD007705CB /* ShadowMapGpuCommandBuffer */,
-				B0BEAC6C298EB1CD007705CB /* Products */,
+				B00F2E1A2990217300AAEEFF /* ShadowMapManualTracking */,
+				B00F2E192990217300AAEEFF /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		B0BEAC6C298EB1CD007705CB /* Products */ = {
+		B00F2E192990217300AAEEFF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B0BEAC6B298EB1CD007705CB /* ShadowMapGpuCommandBuffer.app */,
+				B00F2E182990217300AAEEFF /* ShadowMapManualTracking.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B0BEAC6D298EB1CD007705CB /* ShadowMapGpuCommandBuffer */ = {
+		B00F2E1A2990217300AAEEFF /* ShadowMapManualTracking */ = {
 			isa = PBXGroup;
 			children = (
-				B0BEAC6E298EB1CD007705CB /* ShadowMapGpuCommandBufferApp.swift */,
-				B0BEAC70298EB1CD007705CB /* ContentView.swift */,
-				B0BEAC72298EB1CE007705CB /* Assets.xcassets */,
-				B0BEAC74298EB1CE007705CB /* Preview Content */,
-				B0BEAC7C298EB1F5007705CB /* Scene.metal */,
-				B0BEAC7E298EB21F007705CB /* Shadow.metal */,
+				B00F2E1B2990217300AAEEFF /* ShadowMapManualTrackingApp.swift */,
+				B00F2E1D2990217300AAEEFF /* ContentView.swift */,
+				B00F2E1F2990217300AAEEFF /* Assets.xcassets */,
+				B00F2E212990217300AAEEFF /* Preview Content */,
+				B00F2E29299021B200AAEEFF /* Scene.metal */,
+				B00F2E2B299021B900AAEEFF /* Shadow.metal */,
+				B00F2E2D299021C600AAEEFF /* GpuCommandBuffer.metal */,
 			);
-			path = ShadowMapGpuCommandBuffer;
+			path = ShadowMapManualTracking;
 			sourceTree = "<group>";
 		};
-		B0BEAC74298EB1CE007705CB /* Preview Content */ = {
+		B00F2E212990217300AAEEFF /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				B0BEAC75298EB1CE007705CB /* Preview Assets.xcassets */,
+				B00F2E222990217300AAEEFF /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -76,39 +79,39 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B0BEAC6A298EB1CD007705CB /* ShadowMapGpuCommandBuffer */ = {
+		B00F2E172990217300AAEEFF /* ShadowMapManualTracking */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B0BEAC79298EB1CE007705CB /* Build configuration list for PBXNativeTarget "ShadowMapGpuCommandBuffer" */;
+			buildConfigurationList = B00F2E262990217300AAEEFF /* Build configuration list for PBXNativeTarget "ShadowMapManualTracking" */;
 			buildPhases = (
-				B0BEAC67298EB1CD007705CB /* Sources */,
-				B0BEAC68298EB1CD007705CB /* Frameworks */,
-				B0BEAC69298EB1CD007705CB /* Resources */,
+				B00F2E142990217300AAEEFF /* Sources */,
+				B00F2E152990217300AAEEFF /* Frameworks */,
+				B00F2E162990217300AAEEFF /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = ShadowMapGpuCommandBuffer;
-			productName = ShadowMapGpuCommandBuffer;
-			productReference = B0BEAC6B298EB1CD007705CB /* ShadowMapGpuCommandBuffer.app */;
+			name = ShadowMapManualTracking;
+			productName = ShadowMapManualTracking;
+			productReference = B00F2E182990217300AAEEFF /* ShadowMapManualTracking.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B0BEAC63298EB1CD007705CB /* Project object */ = {
+		B00F2E102990217300AAEEFF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
-					B0BEAC6A298EB1CD007705CB = {
+					B00F2E172990217300AAEEFF = {
 						CreatedOnToolsVersion = 14.2;
 					};
 				};
 			};
-			buildConfigurationList = B0BEAC66298EB1CD007705CB /* Build configuration list for PBXProject "ShadowMapGpuCommandBuffer" */;
+			buildConfigurationList = B00F2E132990217300AAEEFF /* Build configuration list for PBXProject "ShadowMapManualTracking" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -116,44 +119,45 @@
 				en,
 				Base,
 			);
-			mainGroup = B0BEAC62298EB1CD007705CB;
-			productRefGroup = B0BEAC6C298EB1CD007705CB /* Products */;
+			mainGroup = B00F2E0F2990217300AAEEFF;
+			productRefGroup = B00F2E192990217300AAEEFF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B0BEAC6A298EB1CD007705CB /* ShadowMapGpuCommandBuffer */,
+				B00F2E172990217300AAEEFF /* ShadowMapManualTracking */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B0BEAC69298EB1CD007705CB /* Resources */ = {
+		B00F2E162990217300AAEEFF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0BEAC76298EB1CE007705CB /* Preview Assets.xcassets in Resources */,
-				B0BEAC73298EB1CE007705CB /* Assets.xcassets in Resources */,
+				B00F2E232990217300AAEEFF /* Preview Assets.xcassets in Resources */,
+				B00F2E202990217300AAEEFF /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B0BEAC67298EB1CD007705CB /* Sources */ = {
+		B00F2E142990217300AAEEFF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0BEAC71298EB1CD007705CB /* ContentView.swift in Sources */,
-				B0BEAC6F298EB1CD007705CB /* ShadowMapGpuCommandBufferApp.swift in Sources */,
-				B0BEAC7D298EB1F5007705CB /* Scene.metal in Sources */,
-				B0BEAC7F298EB21F007705CB /* Shadow.metal in Sources */,
+				B00F2E2E299021C600AAEEFF /* GpuCommandBuffer.metal in Sources */,
+				B00F2E1E2990217300AAEEFF /* ContentView.swift in Sources */,
+				B00F2E1C2990217300AAEEFF /* ShadowMapManualTrackingApp.swift in Sources */,
+				B00F2E2A299021B200AAEEFF /* Scene.metal in Sources */,
+				B00F2E2C299021B900AAEEFF /* Shadow.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B0BEAC77298EB1CE007705CB /* Debug */ = {
+		B00F2E242990217300AAEEFF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -213,7 +217,7 @@
 			};
 			name = Debug;
 		};
-		B0BEAC78298EB1CE007705CB /* Release */ = {
+		B00F2E252990217300AAEEFF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -267,15 +271,14 @@
 			};
 			name = Release;
 		};
-		B0BEAC7A298EB1CE007705CB /* Debug */ = {
+		B00F2E272990217300AAEEFF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"ShadowMapGpuCommandBuffer/Preview Content\"";
-				DEVELOPMENT_TEAM = Z9W9D2WL9U;
+				DEVELOPMENT_ASSET_PATHS = "\"ShadowMapManualTracking/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -288,7 +291,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.ShadowMapGpuCommandBuffer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ShadowMapManualTracking;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -299,15 +302,14 @@
 			};
 			name = Debug;
 		};
-		B0BEAC7B298EB1CE007705CB /* Release */ = {
+		B00F2E282990217300AAEEFF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"ShadowMapGpuCommandBuffer/Preview Content\"";
-				DEVELOPMENT_TEAM = Z9W9D2WL9U;
+				DEVELOPMENT_ASSET_PATHS = "\"ShadowMapManualTracking/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -320,7 +322,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.ShadowMapGpuCommandBuffer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ShadowMapManualTracking;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -334,25 +336,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B0BEAC66298EB1CD007705CB /* Build configuration list for PBXProject "ShadowMapGpuCommandBuffer" */ = {
+		B00F2E132990217300AAEEFF /* Build configuration list for PBXProject "ShadowMapManualTracking" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B0BEAC77298EB1CE007705CB /* Debug */,
-				B0BEAC78298EB1CE007705CB /* Release */,
+				B00F2E242990217300AAEEFF /* Debug */,
+				B00F2E252990217300AAEEFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B0BEAC79298EB1CE007705CB /* Build configuration list for PBXNativeTarget "ShadowMapGpuCommandBuffer" */ = {
+		B00F2E262990217300AAEEFF /* Build configuration list for PBXNativeTarget "ShadowMapManualTracking" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B0BEAC7A298EB1CE007705CB /* Debug */,
-				B0BEAC7B298EB1CE007705CB /* Release */,
+				B00F2E272990217300AAEEFF /* Debug */,
+				B00F2E282990217300AAEEFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B0BEAC63298EB1CD007705CB /* Project object */;
+	rootObject = B00F2E102990217300AAEEFF /* Project object */;
 }
