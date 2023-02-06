@@ -218,10 +218,10 @@ class MyResource {
             alert(String(describing: e))
         }
         // Create a heap
-        var heapDesc = MTLHeapDescriptor()
+        let heapDesc = MTLHeapDescriptor()
         heapDesc.type = .automatic
         // Should calcurate the heap size using `heapTextureSizeAndAlign`
-        heapDesc.size = 16 * 1024 * 1024
+        heapDesc.size = 64 * 1024 * 1024
         heapDesc.hazardTrackingMode = .untracked
         heapDesc.storageMode = .private
         self.heapPrivate = device.makeHeap(descriptor: heapDesc)!
@@ -368,7 +368,8 @@ class Metal: NSObject, MTKViewDelegate {
         texDesc.pixelFormat = .depth32Float
         texDesc.usage = [.renderTarget]
         texDesc.hazardTrackingMode = .untracked
-        self.resource.zTex = self.resource.heapPrivate.makeTexture(descriptor: texDesc)
+        self.resource.zTex = self.resource.heapPrivate.makeTexture(descriptor: texDesc)!
+        print("Heap allocated \(self.resource.heapPrivate.usedSize / 1024) kB")
     }
     func draw(in view: MTKView) {
         if (!self.resource.available()) { return }
