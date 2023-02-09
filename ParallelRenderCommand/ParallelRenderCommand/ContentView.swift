@@ -218,7 +218,7 @@ class MyResource {
         dsDesc.isDepthWriteEnabled = true
         self.depthState = device.makeDepthStencilState(descriptor: dsDesc)!
         
-        var instanceMat = [float4x4](repeating: float4x4(), count: InstanceCount)
+        var instanceMat = [float3x4](repeating: float3x4(), count: InstanceCount)
         instanceMat = instanceMat.map {_ in
             let tx = Float.random(in: -2.5...2.5)
             let ty = Float.random(in: -2.5...2.5)
@@ -226,12 +226,11 @@ class MyResource {
             let sx = Float.random(in: 0.02...0.10)
             let sy = Float.random(in: 0.02...0.10)
             let sz = Float.random(in: 0.02...0.10)
-            return float4x4(columns: (SIMD4(sx, 0, 0, 0),
-                                  SIMD4(0, sy, 0, 0),
-                                  SIMD4(0, 0, sz, 0),
-                                  SIMD4(tx, ty, tz, 1))).transpose
+            return float3x4(columns: (SIMD4(sx, 0, 0, tx),
+                                  SIMD4(0, sy, 0, ty),
+                                  SIMD4(0, 0, sz, tz)))
         }
-        self.instanceMat = device.makeBuffer(bytes: instanceMat, length: MemoryLayout<float4x4>.size * instanceMat.count)!
+        self.instanceMat = device.makeBuffer(bytes: instanceMat, length: MemoryLayout<float3x4>.size * instanceMat.count)!
     }
     func available() -> Bool {
         self.pso != nil
@@ -310,7 +309,7 @@ class Metal: NSObject, MTKViewDelegate {
             enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
             enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
             for i in offset..<(offset + rep) {
-                enc.setVertexBuffer(self.resource.instanceMat, offset: i * MemoryLayout<float4x4>.size, index: 2)
+                enc.setVertexBuffer(self.resource.instanceMat, offset: i * MemoryLayout<float3x4>.size, index: 2)
                 enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
             }
             enc.endEncoding()

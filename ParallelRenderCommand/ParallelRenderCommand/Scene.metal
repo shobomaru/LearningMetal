@@ -17,7 +17,7 @@ struct CScene {
 };
 
 struct CMesh {
-    float4x4 world;
+    float3x4 world;
 };
 
 half3x3 GetNormalMatrix(float4x4 m)
@@ -30,10 +30,11 @@ vertex Output sceneVS(Input input [[stage_in]],
                       constant CMesh &mesh [[buffer(2)]],
                       uint vid [[vertex_id]])
 {
+    const float4x4 worldMat = float4x4(mesh.world[0], mesh.world[1], mesh.world[2], float4(0, 0, 0, 1));
     Output output;
-    output.position = float4(input.position, 1) * mesh.world * scene.viewProj;
+    output.position = float4(input.position, 1) * worldMat * scene.viewProj;
     output.world = output.position.xyz / output.position.w;
-    output.normal = normalize(half3(input.normal) * GetNormalMatrix(mesh.world));
+    output.normal = normalize(half3(input.normal) * GetNormalMatrix(worldMat));
     return output;
 }
 
