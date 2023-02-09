@@ -3,8 +3,6 @@ import MetalKit
 import simd
 
 let ManualTracking = true
-// MTLFence cannot sync between render passes?? Artifacs oocur on M1 Mac
-let UseEvent = false
 
 struct ContentView: View {
     @State private var message = "default"
@@ -80,7 +78,6 @@ class MyResource {
     var heap: MTLHeap
     var downsampleTex: [MTLTexture]
     var fence: MTLFence
-    var event: MTLEvent
     init(device: MTLDevice, alert: (String) -> Void) {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let vs = lib.makeFunction(name: "filterVS") else { fatalError() }
@@ -203,7 +200,6 @@ class MyResource {
         }
         
         self.fence = device.makeFence()!
-        self.event = device.makeEvent()!
     }
     func available() -> Bool {
         self.psoStretch != nil && self.psoStretchBlend != nil && self.psoBlur != nil
@@ -245,8 +241,6 @@ class Metal: NSObject, MTKViewDelegate {
         self.frameCount += 1
         //let frameIndex = Int(self.frameCount % 2)
         
-        var eventNo = self.frameCount * 1000
-        
         let cmdBuf = self.cmdQueue.makeCommandBuffer()!
         var passDesc = MTLRenderPassDescriptor()
         passDesc.colorAttachments[0].loadAction = .dontCare
@@ -268,16 +262,14 @@ class Metal: NSObject, MTKViewDelegate {
             }
             let threshold: Float = (i == 0) ? 0.30 : 0.10
             enc.setFragmentBytes([Float](repeating: threshold, count: 1), length: 4, index: 0)
+            if ManualTracking {
+                enc.waitForFence(self.resource.fence, before: .fragment)
+            }
             enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
             if ManualTracking {
                 enc.updateFence(self.resource.fence, after: .fragment)
             }
             enc.endEncoding()
-            if UseEvent {
-                cmdBuf.encodeSignalEvent(self.resource.event, value: eventNo)
-                cmdBuf.encodeWaitForEvent(self.resource.event, value: eventNo)
-                eventNo += 1
-            }
             
             passDesc.colorAttachments[0].texture = self.resource.downsampleTex[2 * i + 1]
             enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
@@ -293,11 +285,6 @@ class Metal: NSObject, MTKViewDelegate {
                 enc.updateFence(self.resource.fence, after: .fragment)
             }
             enc.endEncoding()
-            if UseEvent {
-                cmdBuf.encodeSignalEvent(self.resource.event, value: eventNo)
-                cmdBuf.encodeWaitForEvent(self.resource.event, value: eventNo)
-                eventNo += 1
-            }
         }
         for i in (1..<DownsampleLevel).reversed() {
             passDesc.colorAttachments[0].loadAction = .load
@@ -316,11 +303,6 @@ class Metal: NSObject, MTKViewDelegate {
                 enc.updateFence(self.resource.fence, after: .fragment)
             }
             enc.endEncoding()
-            if UseEvent {
-                cmdBuf.encodeSignalEvent(self.resource.event, value: eventNo)
-                cmdBuf.encodeWaitForEvent(self.resource.event, value: eventNo)
-                eventNo += 1
-            }
         }
         
         passDesc = view.currentRenderPassDescriptor!
