@@ -151,11 +151,7 @@ class MyResource {
             (s + a - 1) & ~(a - 1)
         }
         let calcDownsampleHeapSize = { () -> Int in
-            let desc = MTLTextureDescriptor()
-            desc.width = 128
-            desc.height = 128
-            desc.pixelFormat = .rgba8Unorm
-            desc.textureType = .type2D
+            let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: 128, height: 128, mipmapped: false)
             desc.usage = [.shaderRead, .renderTarget]
             desc.storageMode = .private
             let downsample00Size = device.heapTextureSizeAndAlign(descriptor: desc)
@@ -187,11 +183,7 @@ class MyResource {
         self.downsampleTex = [MTLTexture]()
         for i in 0..<DownsampleLevel {
             for j in 0..<2 {
-                let desc = MTLTextureDescriptor()
-                desc.width = 128 / (i + 1)
-                desc.height = 128 / (i + 1)
-                desc.pixelFormat = .rgba8Unorm
-                desc.textureType = .type2D
+                let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: 128 / (i + 1), height: 128 / (i + 1), mipmapped: false)
                 desc.usage = [.shaderRead, .renderTarget]
                 desc.storageMode = .private
                 self.downsampleTex.append(self.heap.makeTexture(descriptor: desc, offset: heapPlacementList[2 * i + j])!)
