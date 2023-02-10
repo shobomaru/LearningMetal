@@ -70,6 +70,7 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 let DownsampleLevel = 4
+let NumThreads = MTLSize(width: 8, height: 8, depth: 1)
 
 class MyResource {
     var psoStretch: MTLComputePipelineState?
@@ -83,10 +84,25 @@ class MyResource {
         guard let csStretch = lib.makeFunction(name: "stretchCS") else { fatalError() }
         guard let csAddBlend = lib.makeFunction(name: "addBlendCS") else { fatalError() }
         guard let csBlur = lib.makeFunction(name: "blurCS") else { fatalError() }
+        let psoDesc = MTLComputePipelineDescriptor()
+        psoDesc.threadGroupSizeIsMultipleOfThreadExecutionWidth = true // may increse GPU performance
         do {
-            self.psoStretch = try device.makeComputePipelineState(function: csStretch)
-            self.psoAddBlend = try device.makeComputePipelineState(function: csAddBlend)
-            self.psoBlur = try device.makeComputePipelineState(function: csBlur)
+            psoDesc.computeFunction = csStretch
+            self.psoStretch = try device.makeComputePipelineState(descriptor: psoDesc, options: []).0
+            psoDesc.computeFunction = csAddBlend
+            self.psoAddBlend = try device.makeComputePipelineState(descriptor: psoDesc, options: []).0
+            psoDesc.computeFunction = csBlur
+            self.psoBlur = try device.makeComputePipelineState(descriptor: psoDesc, options: []).0
+            
+            if (NumThreads.width * NumThreads.height) % self.psoStretch!.threadExecutionWidth != 0 {
+                throw NSError(domain: "Unexpected thread execution width", code: 1)
+            }
+            if (NumThreads.width * NumThreads.height) % self.psoAddBlend!.threadExecutionWidth != 0 {
+                throw NSError(domain: "Unexpected thread execution width", code: 1)
+            }
+            if (NumThreads.width * NumThreads.height) % self.psoBlur!.threadExecutionWidth != 0 {
+                throw NSError(domain: "Unexpected thread execution width", code: 1)
+            }
         } catch let e {
             print(e)
             alert(String(describing: e))
@@ -208,9 +224,8 @@ class Metal: NSObject, MTKViewDelegate {
         let align = { (s: Int, a: Int) -> Int in
             (s + a - 1) & ~(a - 1)
         }
-        let numThreads = MTLSize(width: 8, height: 8, depth: 1)
         let getDispatchNum = { (t: MTLTexture) -> MTLSize in
-            MTLSize(width: align(t.width + numThreads.width - 1, numThreads.width), height: align(t.height + numThreads.height - 1, numThreads.height), depth: 1)
+            MTLSize(width: align(t.width + NumThreads.width - 1, NumThreads.width), height: align(t.height + NumThreads.height - 1, NumThreads.height), depth: 1)
         }
         
         let cmdBuf = self.cmdQueue.makeCommandBuffer()!
@@ -232,7 +247,7 @@ class Metal: NSObject, MTKViewDelegate {
             enc.setTexture(self.resource.downsampleTex[2 * i], index: 1)
             let threshold: Float = (i == 0) ? 0.30 : 0.10
             enc.setBytes([Float](repeating: threshold, count: 1), length: 4, index: 0)
-            enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i]), threadsPerThreadgroup: numThreads)
+            enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i]), threadsPerThreadgroup: NumThreads)
             enc.popDebugGroup()
             if ManualTracking {
                 // MTLFence did not update/wait multiple times in one encoder,
@@ -245,7 +260,7 @@ class Metal: NSObject, MTKViewDelegate {
             enc.useHeap(self.resource.heap) // need multiple call in one encoder?
             enc.setTexture(self.resource.downsampleTex[2 * i], index: 0)
             enc.setTexture(self.resource.downsampleTex[2 * i + 1], index: 1)
-            enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i + 1]), threadsPerThreadgroup: numThreads)
+            enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i + 1]), threadsPerThreadgroup: NumThreads)
             enc.popDebugGroup()
             if ManualTracking {
                 enc.memoryBarrier(scope: MTLBarrierScope.textures)
@@ -258,7 +273,7 @@ class Metal: NSObject, MTKViewDelegate {
             enc.setTexture(self.resource.downsampleTex[2 * i + 1], index: 0)
             enc.setTexture(self.resource.downsampleTex[2 * i - 1], index: 1)
             enc.setBytes([Float](repeating: 0.12, count: 1), length: 4, index: 0)
-            enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i + 1]), threadsPerThreadgroup: numThreads)
+            enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i + 1]), threadsPerThreadgroup: NumThreads)
             enc.popDebugGroup()
             if ManualTracking {
                 enc.memoryBarrier(scope: MTLBarrierScope.textures)
@@ -274,7 +289,7 @@ class Metal: NSObject, MTKViewDelegate {
         }
         enc.setTexture(self.resource.sailboatTex, index: 0)
         enc.setTexture(currentDrawable.texture, index: 1)
-        enc.dispatchThreadgroups(getDispatchNum(currentDrawable.texture), threadsPerThreadgroup: numThreads)
+        enc.dispatchThreadgroups(getDispatchNum(currentDrawable.texture), threadsPerThreadgroup: NumThreads)
         if ManualTracking {
             enc.memoryBarrier(scope: MTLBarrierScope.textures)
         }
@@ -282,7 +297,7 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setComputePipelineState(self.resource.psoAddBlend!)
         enc.useHeap(self.resource.heap)
         enc.setTexture(self.resource.downsampleTex[1], index: 0)
-        enc.dispatchThreadgroups(getDispatchNum(currentDrawable.texture), threadsPerThreadgroup: numThreads)
+        enc.dispatchThreadgroups(getDispatchNum(currentDrawable.texture), threadsPerThreadgroup: NumThreads)
         enc.popDebugGroup()
         enc.endEncoding()
         cmdBuf.present(currentDrawable)
