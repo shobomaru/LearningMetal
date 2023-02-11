@@ -7,26 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B00F2EB32995E97100AAEEFF /* BloomCSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F2EB22995E97100AAEEFF /* BloomCSApp.swift */; };
-		B00F2EB52995E97100AAEEFF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F2EB42995E97100AAEEFF /* ContentView.swift */; };
-		B00F2EB72995E97200AAEEFF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00F2EB62995E97200AAEEFF /* Assets.xcassets */; };
-		B00F2EBA2995E97200AAEEFF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00F2EB92995E97200AAEEFF /* Preview Assets.xcassets */; };
-		B00F2EC729963F6200AAEEFF /* Filter.metal in Sources */ = {isa = PBXBuildFile; fileRef = B00F2EC629963F6200AAEEFF /* Filter.metal */; };
-		B00F2EC929963F8100AAEEFF /* Sailboat.bmp in Resources */ = {isa = PBXBuildFile; fileRef = B00F2EC829963F8100AAEEFF /* Sailboat.bmp */; };
+		B0A2854029967232006775B5 /* TessellationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A2853F29967232006775B5 /* TessellationApp.swift */; };
+		B0A2854229967232006775B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A2854129967232006775B5 /* ContentView.swift */; };
+		B0A2854429967232006775B5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0A2854329967232006775B5 /* Assets.xcassets */; };
+		B0A2854729967232006775B5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0A2854629967232006775B5 /* Preview Assets.xcassets */; };
+		B0A2854E2996724E006775B5 /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0A2854D2996724E006775B5 /* Scene.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B00F2EAF2995E97100AAEEFF /* BloomCS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BloomCS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B00F2EB22995E97100AAEEFF /* BloomCSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomCSApp.swift; sourceTree = "<group>"; };
-		B00F2EB42995E97100AAEEFF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B00F2EB62995E97200AAEEFF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B00F2EB92995E97200AAEEFF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		B00F2EC629963F6200AAEEFF /* Filter.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Filter.metal; sourceTree = "<group>"; };
-		B00F2EC829963F8100AAEEFF /* Sailboat.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = Sailboat.bmp; path = ../../res/Sailboat.bmp; sourceTree = "<group>"; };
+		B0A2853C29967232006775B5 /* Tessellation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tessellation.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0A2853F29967232006775B5 /* TessellationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TessellationApp.swift; sourceTree = "<group>"; };
+		B0A2854129967232006775B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B0A2854329967232006775B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B0A2854629967232006775B5 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B0A2854D2996724E006775B5 /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B00F2EAC2995E97100AAEEFF /* Frameworks */ = {
+		B0A2853929967232006775B5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -36,39 +34,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B00F2EA62995E97100AAEEFF = {
+		B0A2853329967232006775B5 = {
 			isa = PBXGroup;
 			children = (
-				B00F2EB12995E97100AAEEFF /* BloomCS */,
-				B00F2EB02995E97100AAEEFF /* Products */,
+				B0A2853E29967232006775B5 /* Tessellation */,
+				B0A2853D29967232006775B5 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		B00F2EB02995E97100AAEEFF /* Products */ = {
+		B0A2853D29967232006775B5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B00F2EAF2995E97100AAEEFF /* BloomCS.app */,
+				B0A2853C29967232006775B5 /* Tessellation.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B00F2EB12995E97100AAEEFF /* BloomCS */ = {
+		B0A2853E29967232006775B5 /* Tessellation */ = {
 			isa = PBXGroup;
 			children = (
-				B00F2EC829963F8100AAEEFF /* Sailboat.bmp */,
-				B00F2EB22995E97100AAEEFF /* BloomCSApp.swift */,
-				B00F2EB42995E97100AAEEFF /* ContentView.swift */,
-				B00F2EC629963F6200AAEEFF /* Filter.metal */,
-				B00F2EB62995E97200AAEEFF /* Assets.xcassets */,
-				B00F2EB82995E97200AAEEFF /* Preview Content */,
+				B0A2853F29967232006775B5 /* TessellationApp.swift */,
+				B0A2854129967232006775B5 /* ContentView.swift */,
+				B0A2854329967232006775B5 /* Assets.xcassets */,
+				B0A2854529967232006775B5 /* Preview Content */,
+				B0A2854D2996724E006775B5 /* Scene.metal */,
 			);
-			path = BloomCS;
+			path = Tessellation;
 			sourceTree = "<group>";
 		};
-		B00F2EB82995E97200AAEEFF /* Preview Content */ = {
+		B0A2854529967232006775B5 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				B00F2EB92995E97200AAEEFF /* Preview Assets.xcassets */,
+				B0A2854629967232006775B5 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -76,39 +73,39 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B00F2EAE2995E97100AAEEFF /* BloomCS */ = {
+		B0A2853B29967232006775B5 /* Tessellation */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B00F2EBD2995E97200AAEEFF /* Build configuration list for PBXNativeTarget "BloomCS" */;
+			buildConfigurationList = B0A2854A29967232006775B5 /* Build configuration list for PBXNativeTarget "Tessellation" */;
 			buildPhases = (
-				B00F2EAB2995E97100AAEEFF /* Sources */,
-				B00F2EAC2995E97100AAEEFF /* Frameworks */,
-				B00F2EAD2995E97100AAEEFF /* Resources */,
+				B0A2853829967232006775B5 /* Sources */,
+				B0A2853929967232006775B5 /* Frameworks */,
+				B0A2853A29967232006775B5 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = BloomCS;
-			productName = BloomCS;
-			productReference = B00F2EAF2995E97100AAEEFF /* BloomCS.app */;
+			name = Tessellation;
+			productName = Tessellation;
+			productReference = B0A2853C29967232006775B5 /* Tessellation.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B00F2EA72995E97100AAEEFF /* Project object */ = {
+		B0A2853429967232006775B5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
-					B00F2EAE2995E97100AAEEFF = {
+					B0A2853B29967232006775B5 = {
 						CreatedOnToolsVersion = 14.2;
 					};
 				};
 			};
-			buildConfigurationList = B00F2EAA2995E97100AAEEFF /* Build configuration list for PBXProject "BloomCS" */;
+			buildConfigurationList = B0A2853729967232006775B5 /* Build configuration list for PBXProject "Tessellation" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -116,44 +113,43 @@
 				en,
 				Base,
 			);
-			mainGroup = B00F2EA62995E97100AAEEFF;
-			productRefGroup = B00F2EB02995E97100AAEEFF /* Products */;
+			mainGroup = B0A2853329967232006775B5;
+			productRefGroup = B0A2853D29967232006775B5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B00F2EAE2995E97100AAEEFF /* BloomCS */,
+				B0A2853B29967232006775B5 /* Tessellation */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B00F2EAD2995E97100AAEEFF /* Resources */ = {
+		B0A2853A29967232006775B5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B00F2EC929963F8100AAEEFF /* Sailboat.bmp in Resources */,
-				B00F2EBA2995E97200AAEEFF /* Preview Assets.xcassets in Resources */,
-				B00F2EB72995E97200AAEEFF /* Assets.xcassets in Resources */,
+				B0A2854729967232006775B5 /* Preview Assets.xcassets in Resources */,
+				B0A2854429967232006775B5 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B00F2EAB2995E97100AAEEFF /* Sources */ = {
+		B0A2853829967232006775B5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B00F2EB52995E97100AAEEFF /* ContentView.swift in Sources */,
-				B00F2EB32995E97100AAEEFF /* BloomCSApp.swift in Sources */,
-				B00F2EC729963F6200AAEEFF /* Filter.metal in Sources */,
+				B0A2854229967232006775B5 /* ContentView.swift in Sources */,
+				B0A2854029967232006775B5 /* TessellationApp.swift in Sources */,
+				B0A2854E2996724E006775B5 /* Scene.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B00F2EBB2995E97200AAEEFF /* Debug */ = {
+		B0A2854829967232006775B5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -213,7 +209,7 @@
 			};
 			name = Debug;
 		};
-		B00F2EBC2995E97200AAEEFF /* Release */ = {
+		B0A2854929967232006775B5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -267,15 +263,14 @@
 			};
 			name = Release;
 		};
-		B00F2EBE2995E97200AAEEFF /* Debug */ = {
+		B0A2854B29967232006775B5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BloomCS/Preview Content\"";
-				DEVELOPMENT_TEAM = Z9W9D2WL9U;
+				DEVELOPMENT_ASSET_PATHS = "\"Tessellation/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -288,7 +283,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.BloomCS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.Tessellation;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -299,15 +294,14 @@
 			};
 			name = Debug;
 		};
-		B00F2EBF2995E97200AAEEFF /* Release */ = {
+		B0A2854C29967232006775B5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BloomCS/Preview Content\"";
-				DEVELOPMENT_TEAM = Z9W9D2WL9U;
+				DEVELOPMENT_ASSET_PATHS = "\"Tessellation/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -320,7 +314,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.BloomCS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.Tessellation;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -334,25 +328,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B00F2EAA2995E97100AAEEFF /* Build configuration list for PBXProject "BloomCS" */ = {
+		B0A2853729967232006775B5 /* Build configuration list for PBXProject "Tessellation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B00F2EBB2995E97200AAEEFF /* Debug */,
-				B00F2EBC2995E97200AAEEFF /* Release */,
+				B0A2854829967232006775B5 /* Debug */,
+				B0A2854929967232006775B5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B00F2EBD2995E97200AAEEFF /* Build configuration list for PBXNativeTarget "BloomCS" */ = {
+		B0A2854A29967232006775B5 /* Build configuration list for PBXNativeTarget "Tessellation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B00F2EBE2995E97200AAEEFF /* Debug */,
-				B00F2EBF2995E97200AAEEFF /* Release */,
+				B0A2854B29967232006775B5 /* Debug */,
+				B0A2854C29967232006775B5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B00F2EA72995E97100AAEEFF /* Project object */;
+	rootObject = B0A2853429967232006775B5 /* Project object */;
 }
