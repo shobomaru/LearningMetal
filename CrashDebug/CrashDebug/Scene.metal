@@ -32,6 +32,9 @@ vertex Output sceneVS(Input input [[stage_in]],
     output.position = float4(input.position, 1) * args.scene->viewProj;
     output.world = input.position;
     output.normal = half3(input.normal);
+    // WRONG!
+    uint MakeOutOfBounds = 0xDEAD101;
+    //output.position += args.scene[MakeOutOfBounds].shadowViewProj[0].xyzw;
     return output;
 }
 

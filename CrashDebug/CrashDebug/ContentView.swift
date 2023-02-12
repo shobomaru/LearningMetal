@@ -2,9 +2,25 @@ import SwiftUI
 import MetalKit
 import simd
 
+// I have implemented some out of bounds behaviours
+// Please grep `MakeOutOfBounds` and remove that comments
+
 struct ContentView: View {
     @State private var message = "default"
     @State private var isShowAlert = false
+    init() {
+        // Shader validation layers a.k.a GPU based validation
+        // https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early
+        // But they look no effect for me
+        // We may need to edit the project scheme to enable Shader Validation and set a system breakpoint
+        // https://developer.apple.com/videos/play/wwdc2020/10616/
+#if true
+        setenv("MTL_SHADER_VALIDATION", "1", 1)
+        setenv("MTL_SHADER_VALIDATION_GLOBAL_MEMORY", "1", 1)
+        setenv("MTL_SHADER_VALIDATION_THREADGROUP_MEMORY", "1", 1)
+        setenv("MTL_SHADER_VALIDATION_TEXTURE_USAGE", "1", 1)
+#endif
+    }
     var body: some View {
         VStack {
             ContentView2(message: $message, isShowAlert: $isShowAlert)
@@ -26,18 +42,7 @@ struct ContentView2: MyViewRepresentable {
     @Binding fileprivate var message: String
     @Binding fileprivate var isShowAlert: Bool
     func makeCoordinator() -> Coordinator {
-        // Shader validation layers a.k.a GPU based validation
-        // https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early
-        // But they look no effect for me
-        // We may need to edit the project scheme to enable Shader Validation and set a system breakpoint
-        // https://developer.apple.com/videos/play/wwdc2020/10616/
-#if false
-        setenv("MTL_SHADER_VALIDATION", "1", 1)
-        setenv("MTL_SHADER_VALIDATION_GLOBAL_MEMORY", "1", 1)
-        setenv("MTL_SHADER_VALIDATION_THREADGROUP_MEMORY", "1", 1)
-        setenv("MTL_SHADER_VALIDATION_TEXTURE_USAGE", "1", 1)
-#endif
-        return Metal(self)
+        Metal(self)
     }
     private func makeView(context: Context) -> MTKView {
         let v = MTKView()
@@ -420,8 +425,11 @@ class Metal: NSObject, MTKViewDelegate {
         csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
         csEnc.setComputePipelineState(self.resource.psoICB!)
         csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
-        let MakeOutOfBounds: UInt64 = 0xDEADBEEF
-        csEnc.setBytes([self.resource.vb.gpuAddress + MakeOutOfBounds, self.resource.vbPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 1)
+        // right
+        csEnc.setBytes([self.resource.vb.gpuAddress, self.resource.vbPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 1)
+        // WRONG!
+        let MakeOutOfBounds: UInt64 = 0xDEAD101
+        //csEnc.setBytes([self.resource.vb.gpuAddress + MakeOutOfBounds, self.resource.vbPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 1)
         csEnc.setBytes([self.resource.ib.gpuAddress, self.resource.ibPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 2)
         csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 3)
         csEnc.setBytes([self.resource.argScene[frameIndex].gpuAddress], length: MemoryLayout<UInt64>.size, index: 4)

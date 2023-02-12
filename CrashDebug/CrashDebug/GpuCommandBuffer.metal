@@ -17,7 +17,11 @@ kernel void sceneIndirectCommandBuffer(ushort dtid [[thread_position_in_grid]],
     render_command render(icb.cmdBuf, dtid);
     //render.set_render_pipeline_state(icb.pso);
     render.set_vertex_buffer(reinterpret_cast<const device void*>(vbList[dtid]), 0);
+    // right
     render.set_vertex_buffer(reinterpret_cast<const device void*>(argList[0]), 1); // same argument buffer
+    // WRONG!
+    uint MakeOutOfBounds = 0xDEAD101;
+    //render.set_vertex_buffer(reinterpret_cast<const device void*>(argList[0 + MakeOutOfBounds]), 1); // same argument buffer
     render.set_fragment_buffer(reinterpret_cast<const device void*>(argList[0]), 1); // same arugment buffer
     render.draw_indexed_primitives(primitive_type::triangle, indexCountList[dtid], reinterpret_cast<const device ushort*>(ibList[dtid]), 1);
 }
