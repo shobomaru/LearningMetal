@@ -1,6 +1,7 @@
 import SwiftUI
 import MetalKit
 import simd
+import os.signpost
 
 let InstanceCount = 4000
 
@@ -308,10 +309,14 @@ class Metal: NSObject, MTKViewDelegate {
             enc.setDepthStencilState(self.resource.depthState)
             enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
             enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
+            // We can check the elapsed CPU time using Instruments App
+            let signposter = OSSignposter()
+            let signpostState = signposter.beginInterval("RenderLoop", id: signposter.makeSignpostID())
             for i in offset..<(offset + rep) {
                 enc.setVertexBuffer(self.resource.instanceMat, offset: i * MemoryLayout<float3x4>.size, index: 2)
                 enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
             }
+            signposter.endInterval("RenderLoop", signpostState)
             enc.endEncoding()
         }
         let group = DispatchGroup()
