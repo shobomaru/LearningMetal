@@ -244,6 +244,12 @@ class Metal: NSObject, MTKViewDelegate {
             else {
                 enc.setTexture(self.resource.downsampleTex[2 * i - 1], index: 0)
             }
+            // useHeap() is not suitable for writable textures,
+            // so we call useResource() independently
+            // https://developer.apple.com/documentation/metal/mtlcomputecommandencoder/2866530-useheap
+            if ManualTracking {
+                enc.useResource(self.resource.downsampleTex[2 * i], usage: .write)
+            }
             enc.setTexture(self.resource.downsampleTex[2 * i], index: 1)
             let threshold: Float = (i == 0) ? 0.30 : 0.10
             enc.setBytes([Float](repeating: threshold, count: 1), length: 4, index: 0)
@@ -257,7 +263,10 @@ class Metal: NSObject, MTKViewDelegate {
             
             enc.pushDebugGroup("Blur")
             enc.setComputePipelineState(self.resource.psoBlur!)
-            enc.useHeap(self.resource.heap) // need multiple call in one encoder?
+            enc.useHeap(self.resource.heap) // The last writable texture becomes the readable texture
+            if ManualTracking {
+                enc.useResource(self.resource.downsampleTex[2 * i + 1], usage: .write)
+            }
             enc.setTexture(self.resource.downsampleTex[2 * i], index: 0)
             enc.setTexture(self.resource.downsampleTex[2 * i + 1], index: 1)
             enc.dispatchThreadgroups(getDispatchNum(self.resource.downsampleTex[2 * i + 1]), threadsPerThreadgroup: NumThreads)
@@ -270,6 +279,9 @@ class Metal: NSObject, MTKViewDelegate {
             enc.pushDebugGroup("Blend")
             enc.setComputePipelineState(self.resource.psoAddBlend!)
             enc.useHeap(self.resource.heap)
+            if ManualTracking {
+                enc.useResource(self.resource.downsampleTex[2 * i - 1], usage: .write)
+            }
             enc.setTexture(self.resource.downsampleTex[2 * i + 1], index: 0)
             enc.setTexture(self.resource.downsampleTex[2 * i - 1], index: 1)
             enc.setBytes([Float](repeating: 0.12, count: 1), length: 4, index: 0)
