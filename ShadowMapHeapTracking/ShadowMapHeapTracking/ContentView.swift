@@ -471,7 +471,10 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setDepthStencilState(self.resource.depthState)
         enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
         enc.setVertexBuffer(self.resource.cbShadow[frameIndex], offset: 0, index: 1)
-        enc.useHeap(self.resource.heapPrivate, stages: .fragment)
+        // useHeap() is not suitable for writable textures
+        // https://developer.apple.com/documentation/metal/mtlcomputecommandencoder/2866530-useheap
+        //enc.useHeap(self.resource.heapPrivate, stages: .fragment)
+        enc.useResource(self.resource.shadowTex, usage: .write, stages: .fragment)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
         enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         // Shadow pass has no dependencies
@@ -498,7 +501,8 @@ class Metal: NSObject, MTKViewDelegate {
         // DO NOT FORGET ALL RESOURCE BOUNDS, OR YOU WILL GET INVALID RESOURCES ONLY IN THE METAL GPU DEBUGGER!!!
         enc.useResources([self.resource.cbScene[frameIndex], self.resource.argScene[frameIndex]], usage: .read, stages: .vertex)
         //enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .fragment) // need this?
-        enc.useHeap(self.resource.heapPrivate, stages: .fragment)
+        enc.useHeap(self.resource.heapPrivate, stages: .fragment) // shadowTex
+        enc.useResource(self.resource.zTex!, usage: .write, stages: .fragment)
         if DisableTracking == false {
             enc.waitForFence(self.resource.fence, before: .vertex)
             enc.waitForFence(self.resource.fenceShadowPass, before: .fragment) // The vertex shader does not access the shadow map
