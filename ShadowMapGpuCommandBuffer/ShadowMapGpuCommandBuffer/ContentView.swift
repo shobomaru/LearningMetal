@@ -378,13 +378,10 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setCullMode(.back)
         enc.setDepthStencilState(self.resource.depthState)
         // declare using
-        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .vertex)
-        //enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .fragment) // need this?
+        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex, self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane], usage: .read, stages: .vertex)
         // Encode ICB
         let icb = self.resource.icbScene[frameIndex]
         icb.reset(0..<icb.size)
-        let irb = icb.indirectRenderCommandAt(0)
-        irb.setVertexBuffer(self.resource.vb, offset: 0, at: 0)
         // set arguments
         #if true
         // Metal3: No function reflection needed
@@ -399,6 +396,8 @@ class Metal: NSObject, MTKViewDelegate {
         ae.setTexture(self.resource.shadowTex, index: 1)
         ae.setSamplerState(self.resource.shadowSS, index: 2)
         #endif
+        let irb = icb.indirectRenderCommandAt(0)
+        irb.setVertexBuffer(self.resource.vb, offset: 0, at: 0)
         irb.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
         irb.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
         irb.drawIndexedPrimitives(.triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 0)
