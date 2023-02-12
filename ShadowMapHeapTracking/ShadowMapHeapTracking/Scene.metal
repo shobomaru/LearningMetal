@@ -4,7 +4,6 @@ using namespace metal;
 struct Input {
     float3 position [[attribute(0)]];
     float3 normal [[attribute(1)]];
-    float2 texcoord [[attribute(2)]];
 };
 
 struct Output {
