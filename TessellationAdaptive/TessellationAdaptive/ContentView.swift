@@ -254,9 +254,6 @@ class MyResource {
                                   SIMD4(0, sy, 0, ty),
                                   SIMD4(0, 0, sz, tz)))
         }
-        instanceMat.sort { (a: float3x4, b: float3x4) -> Bool in
-            a[0][3] < b[0][3]
-        }
         self.instanceMat = device.makeBuffer(bytes: instanceMat, length: MemoryLayout<float3x4>.size * instanceMat.count, options: .cpuCacheModeWriteCombined)!
         
         // Variable tessellation factors

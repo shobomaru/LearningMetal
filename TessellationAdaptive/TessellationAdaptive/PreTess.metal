@@ -61,12 +61,12 @@ kernel void preTessCS(ushort2 dtid [[thread_position_in_grid]],
     }
     // debug
     //if (primitiveIndex == 0) factor[0] = instanceIndex * 10.0;
-    //if (instanceIndex > 5) factor[0] = factor[1] = factor[2] == 0.0;
+    //if (instanceIndex >= 1) factor[0] = factor[1] = factor[2] = 0.0;
     
     MTLTriangleTessellationFactorsHalf tess;
-    tess.edgeTessellationFactor[0] = half(factor[0]);
-    tess.edgeTessellationFactor[1] = half(factor[1]);
-    tess.edgeTessellationFactor[2] = half(factor[2]);
+    tess.edgeTessellationFactor[0] = half(factor[1]); // upper-left edge of the patch.
+    tess.edgeTessellationFactor[1] = half(factor[2]); // bottom edge of the patch.
+    tess.edgeTessellationFactor[2] = half(factor[0]); // upper-right edge of the patch.
     tess.insideTessellationFactor = half(factor[0] + factor[1] + factor[2]) / 3.0h;
     tessFactor[uint(info.primitiveCount) * instanceIndex + primitiveIndex] = tess;
 }

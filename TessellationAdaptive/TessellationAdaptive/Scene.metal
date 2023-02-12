@@ -81,6 +81,7 @@ float3 InterpolatePN(float3 bary, const PatchControlInfo cp)
 [[patch(triangle, 3)]]
 vertex Output sceneVS(PatchInput input [[stage_in]],
                       float3 barycentric [[position_in_patch]],
+                      ushort patchId [[patch_id]],
                       ushort instanceCount [[instance_id]],
                       constant CScene &scene [[buffer(1)]],
                       const device float3x4* instanceWorldMat [[buffer(2)]])
@@ -97,14 +98,8 @@ vertex Output sceneVS(PatchInput input [[stage_in]],
     //output.normal = half3(barycentric) * 2 - 1;
     const float3 normal = barycentric.x * input.cp[0].normal + barycentric.y * input.cp[1].normal + barycentric.z * input.cp[2].normal;
     output.normal = normalize(half3(normal) * GetNormalMatrix(worldMat));
-#if 0
-    // Now culling has already run in CS
-    if (dot(patch.b030 - patch.b300, patch.b030 - patch.b300) < 1e-10
-        || dot(patch.b003 - patch.b030, patch.b003 - patch.b030) < 1e-10
-        || dot(patch.b300 - patch.b003, patch.b300 - patch.b003) < 1e-10) {
-        output.position.w = as_type<float>(0x7FFFFFFF/*NaN*/);
-    }
-#endif
+
+    // Now culling has already done in CS
     return output;
 }
 
