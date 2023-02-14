@@ -1,0 +1,19 @@
+name: iOS build
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build (SimpleDraw)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+      - working-directory: ./SimpleDraw
