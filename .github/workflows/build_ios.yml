@@ -13,7 +13,75 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Build (Bloom)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./Bloom
+      - name: Build (BloomCS)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./BloomCS
+      - name: Build (CrashDebug)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./CrashDebug
+      - name: Build (ParallelRenderCommand)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ParallelRenderCommand
+      - name: Build (RetainedReferences)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./RetainedReferences
+      - name: Build (ShadowMap)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ShadowMap
+      - name: Build (ShadowMapArgumentBuffer)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ShadowMapArgumentBuffer
+      - name: Build (ShadowMapGpuCommandBuffer)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ShadowMapGpuCommandBuffer
+      - name: Build (ShadowMapHeapTracking)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ShadowMapHeapTracking
+      - name: Build (ShadowMapIndirectCommandBuffer)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ShadowMapIndirectCommandBuffer
+      - name: Build (ShadowMapManualTracking)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./ShadowMapManualTracking
       - name: Build (SimpleDraw)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./SimpleDraw
+      - name: Build (SimpleTexture)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./SimpleTexture
+      - name: Build (SimpleTriangle)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./SimpleTriangle
+      - name: Build (SimpleTriangl2)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./SimpleTriangle2
+      - name: Build (Tessellation)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./Tessellation
+      - name: Build (Tessellation2)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./Tessellation2
+      - name: Build (TessellationAdaptive)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./TessellationAdaptive
