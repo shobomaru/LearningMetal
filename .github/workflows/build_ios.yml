@@ -16,4 +16,4 @@ jobs:
       - name: Build (SimpleDraw)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
-      - working-directory: ./SimpleDraw
+        working-directory: ./SimpleDraw
