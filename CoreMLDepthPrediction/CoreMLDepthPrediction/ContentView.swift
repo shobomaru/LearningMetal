@@ -87,7 +87,11 @@ class CameraControl: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     func start() {
         session = AVCaptureSession()
         // FCRNFP16 model supports only very low resolution (304x228)
+        #if os(macOS)
         session!.sessionPreset = .qvga320x240
+        #else
+        session!.sessionPreset = .cif352x288
+        #endif
         guard let dev = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .unspecified) else { fatalError() }
         device = dev
         
@@ -110,7 +114,12 @@ class CameraControl: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         #endif
         session!.addOutput(output)
         session!.commitConfiguration()
-        session!.startRunning()
+        
+        // iOS specific warning?
+        // -[AVCaptureSession startRunning] should be called from background thread. Calling it on the main thread can lead to UI unresponsiveness
+        DispatchQueue.global().async {
+            self.session!.startRunning()
+        }
     }
     internal func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         let sp = OSSignposter()
@@ -122,6 +131,8 @@ class CameraControl: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         #if os(macOS)
         // The front camera seems to be flipped...
         imageCI = imageCI.oriented(.down)
+        #elseif os(iOS)
+        imageCI = imageCI.oriented(.upMirrored)
         #endif
         
         sp.endInterval("Camera Capture", st)
@@ -246,6 +257,8 @@ class MLControl {
         
         var orient = CGImagePropertyOrientation.up
         #if os(macOS)
+        orient = CGImagePropertyOrientation.right
+        #elseif os(iOS)
         orient = CGImagePropertyOrientation.right
         #endif
         // Oh no, YUV2 image seems to convert to RGB pixel using GPU which is already run in my program!
@@ -564,7 +577,7 @@ class Metal: NSObject, MTKViewDelegate {
         enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         //
         enc.setFragmentTexture(self.resource.mlTex, index: 0)
-        enc.setViewport(MTLViewport(originX: 0, originY: 0, width: 128 * 3.5, height: 160 * 3.5, znear: 0, zfar: 1))
+        enc.setViewport(MTLViewport(originX: 0, originY: 0, width: 128 * 4.5, height: 160 * 4.5, znear: 0, zfar: 1))
         enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         //
         enc.endEncoding()
