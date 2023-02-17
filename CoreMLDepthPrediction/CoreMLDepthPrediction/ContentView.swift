@@ -158,7 +158,7 @@ class MLControl {
     var isSrcUpdate = false
     var isDestUpdate = false
     var isExit = false
-    let srcLock = NSLock()
+    let srcLock = NSCondition()
     let destLock = NSLock()
     private var dispatcher: DispatchQueue
     private var alert: ((String) -> Void)?
@@ -167,6 +167,9 @@ class MLControl {
     }
     deinit {
         isExit = true
+        // mem fence
+        isSrcUpdate = true
+        srcLock.broadcast()
     }
     func start(alert: @escaping (String) -> Void) {
         self.alert = alert
@@ -236,17 +239,17 @@ class MLControl {
         
         // Start ML worker thread
         dispatcher.async {
-            while !self.isExit {
-                // TODO: Improve efficient
-                if self.isSrcUpdate {
-                    self.srcLock.withLock {
-                        self.perform(imageCI: self.srcImage!)
+            while true {
+                self.srcLock.withLock {
+                    while self.isSrcUpdate == false {
+                        self.srcLock.wait()
                     }
+                    if self.isExit {
+                        return
+                    }
+                    self.perform(imageCI: self.srcImage!)
                     self.vnHandler = nil // Release memory
                     self.isSrcUpdate = false
-                }
-                else {
-                    Thread.sleep(forTimeInterval: 1.0 / 60.0)
                 }
             }
         }
@@ -503,11 +506,12 @@ class Metal: NSObject, MTKViewDelegate {
                 }
             }
         }
-        // Also start ML predication
+        // Also start ML predication if ML thread is idle
         if !self.parent.ml.isSrcUpdate, let uploadImage = uploadImage {
             self.parent.ml.srcLock.withLock {
                 self.parent.ml.isSrcUpdate = true
                 self.parent.ml.srcImage = uploadImage
+                self.parent.ml.srcLock.signal()
             }
         }
         // Upload capture texutre
