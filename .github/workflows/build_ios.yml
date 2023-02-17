@@ -21,6 +21,14 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./BloomCS
+      - name: Download (FCRNFP16.mlmodel)
+        run: |
+          curl -s -o FCRNFP16.mlmodel https://ml-assets.apple.com/coreml/models/Image/DepthEstimation/FCRN/FCRNFP16.mlmodel
+        working-directory: ./CoreMLDepthPrediction/CoreMLDepthPrediction
+      - name: Build (CoreMLDepthPrediction)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./CoreMLDepthPrediction
       - name: Build (CrashDebug)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
