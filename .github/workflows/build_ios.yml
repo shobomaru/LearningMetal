@@ -21,7 +21,15 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./BloomCS
-      - name: Download (FCRNFP16.mlmodel)
+      - name: Cache (FCRNFP16.mlmodel)
+        id: cache-fcrnfp16-mlmodel
+        uses: actions/cache@v3
+        with:
+          path: ./CoreMLDepthPrediction/CoreMLDepthPrediction/FCRNFP16.mlmodel
+          key: dl-build-CoreMLDepthPrediction-01
+      - if: ${{ steps.cache-fcrnfp16-mlmodel.outputs.cache-hit != 'true' }}
+        name: Download (FCRNFP16.mlmodel)
+        continue-on-error: true
         run: |
           curl -s -o FCRNFP16.mlmodel https://ml-assets.apple.com/coreml/models/Image/DepthEstimation/FCRN/FCRNFP16.mlmodel
         working-directory: ./CoreMLDepthPrediction/CoreMLDepthPrediction
