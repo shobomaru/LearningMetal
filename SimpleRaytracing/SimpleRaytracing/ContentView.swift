@@ -267,6 +267,9 @@ class MyResource {
         //   uint intersectionFunctionTableOffset;
         //   uint accelerationStructureIndex;
         // };
+        // Note that first version of Metal raytracing automatically calculate instance_id
+        // If you want a user defined instance ID such as D3D12_RAYTRACING_INSTANCE_DESC,
+        // you can use MTLAccelerationStructureUserIDInstanceDescriptor and user_instance_id (Metal 2.4+)
         let matIdentity = MTLPackedFloat4x3.init(columns: (MTLPackedFloat3Make(1, 0, 0),
                                                           MTLPackedFloat3Make(0, 1, 0),
                                                           MTLPackedFloat3Make(0, 0, 1),
@@ -276,16 +279,18 @@ class MyResource {
         asInstanceDesc[0].transformationMatrix = matIdentity
         asInstanceDesc[0].mask = 0xFF // Non extended limit AS can use 8bit mask
         asInstanceDesc[0].options = [.opaque, .disableTriangleCulling] // Fastest options
+        //asInstanceDesc[0].userID = 0xCAFE;
         asInstanceDesc[1].accelerationStructureIndex = 1
         asInstanceDesc[1].transformationMatrix = matIdentity
         asInstanceDesc[1].mask = 0xFF
         asInstanceDesc[1].options = [.opaque, .disableTriangleCulling]
+        //asInstanceDesc[1].userID = 0xBABE;
         self.tlasDescBuf = device.makeBuffer(bytes: asInstanceDesc, length: MemoryLayout.size(ofValue: asInstanceDesc[0]) * asInstanceDesc.count, options: [.cpuCacheModeWriteCombined])!
         self.tlasDescBuf!.label = "AS Instance descriptor list"
         
         // TLAS
         let asTlasDesc = MTLInstanceAccelerationStructureDescriptor()
-        asTlasDesc.instanceDescriptorType = .default
+        asTlasDesc.instanceDescriptorType = .default //.userID
         asTlasDesc.instancedAccelerationStructures = [self.bvh!, self.bvhPlane!]
         asTlasDesc.instanceCount = asInstanceDesc.count
         asTlasDesc.instanceDescriptorBuffer = self.tlasDescBuf!

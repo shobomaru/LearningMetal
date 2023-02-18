@@ -58,6 +58,7 @@ fragment half4 sceneFS(Output input [[stage_in]],
 #endif
     query.next();
     bool isHit = query.get_committed_intersection_type() == intersection_type::triangle;
+    //isHit = isHit && query.get_committed_user_instance_id() == 0xCAFE;
     if (isHit) {
         intensity *= 0.2;
     }
