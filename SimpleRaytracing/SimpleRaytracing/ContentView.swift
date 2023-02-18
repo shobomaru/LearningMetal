@@ -214,7 +214,7 @@ class MyResource {
         ]
         self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
         
-        self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 64, options: .cpuCacheModeWriteCombined)!, count: 2)
+        self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: .cpuCacheModeWriteCombined)!, count: 2)
         
         let dsDesc = MTLDepthStencilDescriptor()
         dsDesc.depthCompareFunction = .greaterEqual
@@ -339,8 +339,8 @@ class MyResource {
     }
 }
 
-let SPHERE_STACKS: Int = 10
-let SPHERE_SLICES: Int = 12
+let SPHERE_STACKS: Int = 50
+let SPHERE_SLICES: Int = 60
 
 class Metal: NSObject, MTKViewDelegate {
     var parent: ContentView2
@@ -381,14 +381,20 @@ class Metal: NSObject, MTKViewDelegate {
         self.frameCount += 1
         let frameIndex = Int(self.frameCount % 2)
         
+        let deg = 360.0 * Float(self.frameCount) / 240.0
+        let rad = deg * Float.pi / 180.0
+        let virtualShadowPos = simd_float3(sin(rad) * 10.0, 5.0, cos(rad) * 10.0)
+        let lightDir = normalize(virtualShadowPos)
+        
         let viewMat = MathUtil.lookAt(pos: self.scene.cameraPos, target: self.scene.cameraTarget, up: self.scene.cameraUp)
         let projMat = MathUtil.perspective(fov: self.scene.cameraFov, aspect: Float(view.drawableSize.width / view.drawableSize.height), near: self.scene.cameraFar, far: self.scene.cameraNear)
         
         struct CBScene {
             let viewProj: float4x4
+            let lightDir: MTLPackedFloat3
         };
         let viewProj = viewMat.transpose * projMat.transpose
-        var sceneData = CBScene(viewProj: viewProj)
+        var sceneData = CBScene(viewProj: viewProj, lightDir: MTLPackedFloat3Make(lightDir.x, lightDir.y, lightDir.z))
         self.resource.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
         
         let cmdBuf = self.cmdQueue.makeCommandBuffer()!
@@ -409,6 +415,12 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
         enc.setFragmentAccelerationStructure(self.resource.bvhTlas, bufferIndex: 0) // TLAS
         //enc.setFragmentAccelerationStructure(self.resource.bvh, bufferIndex: 0) // Also BLAS can trace directly!
+        enc.setFragmentBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
+        
+        // DON'T FORGET THIS!! YOU WILL LOSE ANY RAY INTERSECTIONS, AND SHOW CORRECTLY ONLY IN THE FRAME DEBUGGER!!
+        // Note that Metal API makes resident only the TLAS, not the BLAS referenced by that
+        enc.useResources([self.resource.bvh!, self.resource.bvhPlane!], usage: .read, stages: .fragment)
+        
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
         enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)

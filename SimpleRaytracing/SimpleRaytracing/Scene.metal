@@ -15,6 +15,7 @@ struct Output {
 
 struct CScene {
     float4x4 viewProj;
+    packed_float3 lightDir;
 };
 
 vertex Output sceneVS(Input input [[stage_in]],
@@ -29,15 +30,16 @@ vertex Output sceneVS(Input input [[stage_in]],
 }
 
 fragment half4 sceneFS(Output input [[stage_in]],
-                       const instance_acceleration_structure tlas [[buffer(0)]]) // TLAS
-                       //const primitive_acceleration_structure blas [[buffer(0)]]) // BLAS
+                       const instance_acceleration_structure tlas [[buffer(0)]], // TLAS
+                       //const primitive_acceleration_structure blas [[buffer(0)]], // BLAS
+                       constant CScene &scene [[buffer(1)]])
 {
     half3 intensity = input.normal * 0.5 + 0.5;
     
     // Emit a shadow ray
     ray r;
     r.origin = input.world;
-    r.direction = normalize(float3(0, 1, 0)); // Assume directional light
+    r.direction = scene.lightDir; // Assume directional light
     r.min_distance = 10e-5; // Avoid self intersection
     r.max_distance = 1000;
     intersection_params params;
