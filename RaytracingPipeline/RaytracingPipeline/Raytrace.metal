@@ -32,7 +32,7 @@ struct RayOutput {
     half4 shadingColor;
 };
 
-using ClosestOrAnyHitShader = RayOutput(const thread RayInput&);
+using ClosestOrAnyOrMissHitShader = RayOutput(const thread RayInput&);
 
 [[visible]]
 RayOutput shadeCS(const thread RayInput& input)
@@ -42,6 +42,7 @@ RayOutput shadeCS(const thread RayInput& input)
     ve[0] = input.vertices[input.indices[0]];
     ve[1] = input.vertices[input.indices[1]];
     ve[2] = input.vertices[input.indices[2]];
+    
     // Calculate intersection point
     VertexElement veInterp;
     veInterp.position = ve[0].position * input.rayBarycentric.x + ve[1].position * input.rayBarycentric.y + ve[2].position * input.rayBarycentric.z;
@@ -49,7 +50,7 @@ RayOutput shadeCS(const thread RayInput& input)
     veInterp.normal = normalize(veInterp.normal);
     
     RayOutput output;
-    output.accept = true;
+    output.accept = true; // Currently all rays are acceptable
     output.shadingColor = half4(half3(veInterp.normal) * 0.5 + 0.5, 1.0);
     return output;
 }
@@ -57,9 +58,22 @@ RayOutput shadeCS(const thread RayInput& input)
 [[visible]]
 RayOutput shadowCS(const thread RayInput& input)
 {
-    RayOutput output = { true, half4(1.0) };
+    RayOutput output = { true, half4(1.0) }; // Currently all rays are acceptable
     return output;
 }
+
+[[visible]]
+RayOutput missCS(const thread RayInput& input)
+{
+    RayOutput output = { false, half4(0.1, 0.2, 0.4, 1.0) };
+    return output;
+}
+
+enum class RayShaderIndex : int {
+    Shade = 0,
+    Shadow = 1,
+    Miss = 2,
+};
 
 template<typename T>
 T getBarycentric(float2 bary)
@@ -70,7 +84,7 @@ T getBarycentric(float2 bary)
 
 kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
                        instance_acceleration_structure tlas [[buffer(0)]],
-                       visible_function_table<ClosestOrAnyHitShader> funcTable [[buffer(1)]],
+                       visible_function_table<ClosestOrAnyOrMissHitShader> funcTable [[buffer(1)]],
                        constant MTLAccelerationStructureInstanceDescriptor* instanceDesc [[buffer(2)]],
                        constant VertexElement* sphereVB [[buffer(3)]],
                        constant ushort* sphereIB [[buffer(4)]],
@@ -105,8 +119,8 @@ kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
         auto result = myInt.intersect(r, tlas, 0x1);
         if (result.type == intersection_type::none) {
             // Clear background
-            half4 color = half4(0.1, 0.2, 0.4, 1.0);
-            output.write(color, dtid);
+            shadeResult = funcTable[(int)RayShaderIndex::Miss](RayInput{});
+            output.write(shadeResult.shadingColor, dtid);
             // Stop processing
             return;
         }
@@ -127,7 +141,7 @@ kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
             (ushort)result.primitive_id, (ushort)result.geometry_id, result.instance_id,
             ve, idx,
         };
-        shadeResult = funcTable[0](rayInput);
+        shadeResult = funcTable[(int)RayShaderIndex::Shade](rayInput);
         shadeT = result.distance;
     } while (shadeResult.accept == false);
     
@@ -161,8 +175,7 @@ kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
             (ushort)result.primitive_id, (ushort)result.geometry_id, result.instance_id,
             ve, idx,
         };
-        shadeResult = funcTable[0](rayInput);
-        auto shadowResult = funcTable[1](rayInput);
+        auto shadowResult = funcTable[(int)RayShaderIndex::Shadow](rayInput);
         isHit = shadowResult.accept;
     } while (isHit == false);
     if (isHit) {

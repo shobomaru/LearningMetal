@@ -44,7 +44,7 @@ jobs:
       - name: Build (RaytracingPipeline)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
-        working-direcrory: ./RaytracingPipeline
+        working-directory: ./RaytracingPipeline
       - name: Build (ParallelRenderCommand)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator

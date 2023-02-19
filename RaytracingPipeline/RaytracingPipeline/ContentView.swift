@@ -153,8 +153,9 @@ class MyResource {
         guard let cs = lib.makeFunction(name: "raytraceCS") else { fatalError() }
         guard let libShade = lib.makeFunction(name: "shadeCS") else { fatalError() }
         guard let libShadow = lib.makeFunction(name: "shadowCS") else { fatalError() }
+        guard let libMiss = lib.makeFunction(name: "missCS") else { fatalError() }
         let linkFunc = MTLLinkedFunctions()
-        linkFunc.functions = [libShade, libShadow]
+        linkFunc.functions = [libShade, libShadow, libMiss]
         let psoDesc = MTLComputePipelineDescriptor()
         psoDesc.computeFunction = cs
         psoDesc.linkedFunctions = linkFunc
@@ -336,15 +337,15 @@ class MyResource {
         }
         // Now the temporary scratch buffer can be freed if you want to use unretained command buffer
         
-        let libShadeHandle = self.pso!.functionHandle(function: libShade)
-        let libShadowHandle = self.pso!.functionHandle(function: libShadow)
-        guard let _ = libShadeHandle else { fatalError() }
-        guard let _ = libShadowHandle else { fatalError() }
+        guard let libShadeHandle = self.pso!.functionHandle(function: libShade) else { fatalError() }
+        guard let libShadowHandle = self.pso!.functionHandle(function: libShadow) else { fatalError() }
+        guard let libMissHandle = self.pso!.functionHandle(function: libMiss) else { fatalError() }
         let visDesc = MTLVisibleFunctionTableDescriptor()
-        visDesc.functionCount = 2
-        self.psoFuncTable = self.pso!.makeVisibleFunctionTable(descriptor: visDesc)
+        visDesc.functionCount = 3
+        self.psoFuncTable = self.pso!.makeVisibleFunctionTable(descriptor: visDesc)!
         self.psoFuncTable!.setFunction(libShadeHandle, index: 0)
         self.psoFuncTable!.setFunction(libShadowHandle, index: 1)
+        self.psoFuncTable!.setFunction(libMissHandle, index: 2)
     }
     func available() -> Bool {
         self.pso != nil && self.isBvhOK
@@ -429,9 +430,6 @@ class Metal: NSObject, MTKViewDelegate {
         // Note that Metal API makes resident only the TLAS, not the BLAS referenced by that
         enc.useResources([self.resource.bvh!, self.resource.bvhPlane!], usage: .read)
         
-        //enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
-        //enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
-        //enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)
         enc.dispatchThreadgroups(MTLSizeMake((currentDrawable.texture.width + 7) / 8, (currentDrawable.texture.height + 7) / 8, 1), threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
         enc.endEncoding()
         cmdBuf.present(currentDrawable)
