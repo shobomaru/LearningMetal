@@ -82,14 +82,20 @@ T getBarycentric(float2 bary)
     return T(1.0 - bary.x - bary.y, bary.x, bary.y);
 }
 
+struct BindlessVBIB {
+    constant VertexElement* vb[2];
+    constant ushort* ib[2];
+};
+
 kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
                        instance_acceleration_structure tlas [[buffer(0)]],
                        visible_function_table<ClosestOrAnyOrMissHitShader> funcTable [[buffer(1)]],
                        constant MTLAccelerationStructureInstanceDescriptor* instanceDesc [[buffer(2)]],
-                       constant VertexElement* sphereVB [[buffer(3)]],
-                       constant ushort* sphereIB [[buffer(4)]],
-                       constant VertexElement* planeVB [[buffer(5)]],
-                       constant ushort* planeIB [[buffer(6)]],
+                       //constant VertexElement* sphereVB [[buffer(3)]],
+                       //constant ushort* sphereIB [[buffer(4)]],
+                       //constant VertexElement* planeVB [[buffer(5)]],
+                       //constant ushort* planeIB [[buffer(6)]],
+                       constant BindlessVBIB &bindlessVBIB [[buffer(3)]],
                        constant CScene &scene [[buffer(7)]],
                        texture2d<half, access::write> output [[texture(0)]])
 {
@@ -126,16 +132,9 @@ kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
         }
         constant VertexElement* ve = nullptr;
         constant ushort* idx = nullptr;
-        if (result.instance_id == 0) {
-            ve = reinterpret_cast<constant VertexElement*>(sphereVB);
-            idx = reinterpret_cast<constant ushort*>(sphereIB);
-            idx += 3 * result.primitive_id;
-        }
-        else if (result.instance_id == 1) {
-            ve = reinterpret_cast<constant VertexElement*>(planeVB);
-            idx = reinterpret_cast<constant ushort*>(planeIB);
-            idx += 3 * result.primitive_id;
-        }
+        ve = bindlessVBIB.vb[result.instance_id];
+        idx = bindlessVBIB.ib[result.instance_id];
+        idx += 3 * result.primitive_id;
         RayInput rayInput = {
             r.origin, r.direction, result.distance, getBarycentric<float3>(result.triangle_barycentric_coord),
             (ushort)result.primitive_id, (ushort)result.geometry_id, result.instance_id,
@@ -160,16 +159,9 @@ kernel void raytraceCS(ushort2 dtid [[thread_position_in_grid]],
         }
         constant VertexElement* ve = nullptr;
         constant ushort* idx = nullptr;
-        if (result.instance_id == 0) {
-            ve = reinterpret_cast<constant VertexElement*>(sphereVB);
-            idx = reinterpret_cast<constant ushort*>(sphereIB);
-            idx += 3 * result.primitive_id;
-        }
-        else if (result.instance_id == 1) {
-            ve = reinterpret_cast<constant VertexElement*>(planeVB);
-            idx = reinterpret_cast<constant ushort*>(planeIB);
-            idx += 3 * result.primitive_id;
-        }
+        ve = bindlessVBIB.vb[result.instance_id];
+        idx = bindlessVBIB.ib[result.instance_id];
+        idx += 3 * result.primitive_id;
         RayInput rayInput = {
             r.origin, r.direction, result.distance, getBarycentric<float3>(result.triangle_barycentric_coord),
             (ushort)result.primitive_id, (ushort)result.geometry_id, result.instance_id,

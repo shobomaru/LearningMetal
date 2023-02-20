@@ -141,13 +141,13 @@ class MyResource {
     var vbPlane: MTLBuffer
     var ibPlane: MTLBuffer
     var cbScene: [MTLBuffer]
+    var bindlessVBIBBuf: MTLBuffer
     var bvh: MTLAccelerationStructure?
     var bvhPlane: MTLAccelerationStructure?
     var bvhTlas: MTLAccelerationStructure?
     var tlasDescBuf: MTLBuffer?
     //var bvhScratch: MTLBuffer
     var isBvhOK = false
-    //var intersectFunc: MTLIntersectionFunctionTable?
     init(device: MTLDevice, queue: MTLCommandQueue, alert: (String) -> Void) {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let cs = lib.makeFunction(name: "raytraceCS") else { fatalError() }
@@ -214,6 +214,10 @@ class MyResource {
         self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
         
         self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: .cpuCacheModeWriteCombined)!, count: 2)
+        
+        let bindlessVBIBData: [UInt64] = [self.vb.gpuAddress, self.vbPlane.gpuAddress, self.ib.gpuAddress, self.ibPlane.gpuAddress]
+        self.bindlessVBIBBuf = device.makeBuffer(bytes: bindlessVBIBData, length: MemoryLayout.size(ofValue: bindlessVBIBData[0]) * bindlessVBIBData.count, options: [.cpuCacheModeWriteCombined])!
+        self.bindlessVBIBBuf.label = "Bindless VBIB Buffer"
         
         // Create acceleration structures and shared scratch buffer
         
@@ -419,16 +423,15 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setAccelerationStructure(self.resource.bvhTlas, bufferIndex: 0) // TLAS
         enc.setVisibleFunctionTable(self.resource.psoFuncTable!, bufferIndex: 1)
         enc.setBuffer(self.resource.tlasDescBuf, offset: 0, index: 2)
-        enc.setBuffer(self.resource.vb, offset: 0, index: 3)
-        enc.setBuffer(self.resource.ib, offset: 0, index: 4)
-        enc.setBuffer(self.resource.vbPlane, offset: 0, index: 5)
-        enc.setBuffer(self.resource.ibPlane, offset: 0, index: 6)
+        enc.setBuffer(self.resource.bindlessVBIBBuf, offset: 0, index: 3)
         enc.setBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 7)
         enc.setTexture(currentDrawable.texture, index: 0)
         
         // DON'T FORGET THIS!! YOU WILL LOSE ANY RAY INTERSECTIONS, AND SHOW CORRECTLY ONLY IN THE FRAME DEBUGGER!!
         // Note that Metal API makes resident only the TLAS, not the BLAS referenced by that
         enc.useResources([self.resource.bvh!, self.resource.bvhPlane!], usage: .read)
+        // And bindless resources
+        enc.useResources([self.resource.vb, self.resource.ib, self.resource.vbPlane, self.resource.ibPlane], usage: .read)
         
         enc.dispatchThreadgroups(MTLSizeMake((currentDrawable.texture.width + 7) / 8, (currentDrawable.texture.height + 7) / 8, 1), threadsPerThreadgroup: MTLSizeMake(8, 8, 1))
         enc.endEncoding()
