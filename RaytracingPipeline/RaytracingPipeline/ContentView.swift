@@ -313,20 +313,11 @@ class MyResource {
         let cmdBuf = queue.makeCommandBuffer()!
         cmdBuf.label = "AS command buffer"
         let enc = cmdBuf.makeAccelerationStructureCommandEncoder()!
-        enc.label = "AS command encoder 1"
+        enc.label = "AS command encoder"
         enc.build(accelerationStructure: self.bvh!, descriptor: asDesc, scratchBuffer: bvhScratch, scratchBufferOffset: 0)
+        enc.build(accelerationStructure: self.bvhPlane!, descriptor: asPlaneDesc, scratchBuffer: bvhScratch, scratchBufferOffset: 0)
+        enc.build(accelerationStructure: self.bvhTlas!, descriptor: asTlasDesc, scratchBuffer: bvhScratch, scratchBufferOffset: 0)
         enc.endEncoding()
-        // GPU fence for waiting the scratch buffer free
-        // MTLAccelerationStructureCommandEncoder doesn't have memoryBarrier()?
-        let enc1 = cmdBuf.makeAccelerationStructureCommandEncoder()!
-        enc1.label = "AS command encoder 2"
-        enc1.build(accelerationStructure: self.bvhPlane!, descriptor: asPlaneDesc, scratchBuffer: bvhScratch, scratchBufferOffset: 0)
-        enc1.endEncoding()
-        // GPU fence
-        let enc2 = cmdBuf.makeAccelerationStructureCommandEncoder()!
-        enc2.label = "AS command encoder 3"
-        enc2.build(accelerationStructure: self.bvhTlas!, descriptor: asTlasDesc, scratchBuffer: bvhScratch, scratchBufferOffset: 0)
-        enc2.endEncoding()
         cmdBuf.commit()
         cmdBuf.waitUntilCompleted()
         if let err = cmdBuf.error {
