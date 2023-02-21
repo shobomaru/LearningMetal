@@ -53,6 +53,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./RetainedReferences
+      - name: Build (RasterOrderGroupOIT)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./RasterOrderGroupOIT
       - name: Build (ShadowMap)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
