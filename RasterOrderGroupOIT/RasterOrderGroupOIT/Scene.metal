@@ -14,6 +14,10 @@ struct Output {
 
 struct PixelOutput {
     half4 color [[color(0), raster_order_group(0)]];
+    half4 blend1 [[color(1), raster_order_group(0)]];
+    half4 blend2 [[color(2), raster_order_group(0)]];
+    half4 blend3 [[color(3), raster_order_group(0)]];
+    float4 depth [[color(4), raster_order_group(0)]];
 };
 
 struct CScene {
@@ -46,10 +50,61 @@ fragment PixelOutput sceneFS(Output input [[stage_in]],
     //alpha = 1.0; // No blending, useful for debug
     half3 intensity = input.normal * 0.5 + 0.5;
     // Simple depth fade
-    intensity = mix(half3(0.5), intensity, saturate(2000.0 * input.position.z / input.position.w - 18.5));
-    // Read the current render target
-    half4 accum = pixelInput.color;
-    // Programmable blending
-    accum = accum * (1.0 - alpha) + half4(intensity, 0) * alpha;
-    return PixelOutput{ accum };
+    float depth = input.position.z / input.position.w;
+    intensity = mix(half3(0.5), intensity, saturate(2000.0 * depth - 18.5));
+    
+    half4 color = half4(intensity * alpha, alpha); // Pre-multiplied alpha
+    float4 depthList = pixelInput.depth;
+    short insertIndex = -1;
+    if (depthList.x <= depth) {
+        insertIndex = 0;
+        depthList = float4(depth, depthList.xyz);
+    }
+    else if (depthList.y <= depth) {
+        insertIndex = 1;
+        depthList = float4(depthList.x, depth, depthList.yz);
+    }
+    else if (depthList.z <= depth) {
+        insertIndex = 2;
+        depthList = float4(depthList.xy, depth, depthList.z);
+    }
+    else if (depthList.w <= depth) {
+        insertIndex = 3;
+        depthList = float4(depthList.xyz, depth);
+    }
+    else {
+        discard_fragment(); // TODO: Is this works efficiently?
+    }
+    
+    PixelOutput output;
+    if (insertIndex == 3) {
+        output.blend3 = color;
+        output.blend2 = pixelInput.blend2;
+        output.blend1 = pixelInput.blend1;
+        output.color = pixelInput.color;
+    }
+    else if (insertIndex == 2) {
+        output.blend3 = pixelInput.blend2;
+        output.blend2 = color;
+        output.blend1 = pixelInput.blend1;
+        output.color = pixelInput.color;
+    }
+    else if (insertIndex == 1) {
+        output.blend3 = pixelInput.blend2;
+        output.blend2 = pixelInput.blend1;
+        output.blend1 = color;
+        output.color = pixelInput.color;
+    }
+    else if (insertIndex == 0) {
+        output.blend3 = pixelInput.blend2;
+        output.blend2 = pixelInput.blend1;
+        output.blend1 = pixelInput.color;
+        output.color = color;
+    }
+    else {
+        output = pixelInput;
+    }
+    output.depth = depthList;
+    
+    return output;
 }

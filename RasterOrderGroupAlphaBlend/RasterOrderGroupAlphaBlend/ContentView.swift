@@ -136,7 +136,6 @@ class MyScene {
 
 class MyResource {
     var pso: MTLRenderPipelineState?
-    var psoBlend: MTLRenderPipelineState?
     var vb: MTLBuffer
     var ib: MTLBuffer
     var vbPlane: MTLBuffer
@@ -145,17 +144,11 @@ class MyResource {
     //var zTex: MTLTexture?
     //var depthState: MTLDepthStencilState
     var instanceMat: MTLBuffer
-    var blendLayer1: MTLTexture?
-    var blendLayer2: MTLTexture?
-    var blendLayer3: MTLTexture?
-    var depthLayer: MTLTexture?
     init(device: MTLDevice, alert: (String) -> Void) {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let vs = lib.makeFunction(name: "sceneVS") else { fatalError() }
         guard let fs = lib.makeFunction(name: "sceneFS") else { fatalError() }
-        guard let vsBlend = lib.makeFunction(name: "blendVS") else { fatalError() }
-        guard let fsBlend = lib.makeFunction(name: "blendFS") else { fatalError() }
-        var psoDesc = MTLRenderPipelineDescriptor()
+        let psoDesc = MTLRenderPipelineDescriptor()
         psoDesc.vertexFunction = vs
         psoDesc.fragmentFunction = fs
         let vd = MTLVertexDescriptor()
@@ -167,30 +160,11 @@ class MyResource {
         vd.attributes[1].offset = MemoryLayout<MTLPackedFloat3>.size
         vd.layouts[0].stride = MemoryLayout<VertexElement>.stride
         psoDesc.vertexDescriptor = vd
-        psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm // Scene output
-        psoDesc.colorAttachments[1].pixelFormat = .rgba8Unorm // Blend 1
-        psoDesc.colorAttachments[2].pixelFormat = .rgba8Unorm // Blend 2
-        psoDesc.colorAttachments[3].pixelFormat = .rgba8Unorm // Blend 3
-        psoDesc.colorAttachments[4].pixelFormat = .rgba32Float // Depth
+        psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm
         //psoDesc.depthAttachmentPixelFormat = .depth32Float
         psoDesc.label = "Scene PSO"
         do {
             self.pso = try device.makeRenderPipelineState(descriptor: psoDesc)
-        } catch let e {
-            print(e)
-            alert(String(describing: e))
-        }
-        psoDesc = MTLRenderPipelineDescriptor()
-        psoDesc.vertexFunction = vsBlend
-        psoDesc.fragmentFunction = fsBlend
-        psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm // Scene output
-        psoDesc.colorAttachments[1].pixelFormat = .rgba8Unorm // Blend 1
-        psoDesc.colorAttachments[2].pixelFormat = .rgba8Unorm // Blend 2
-        psoDesc.colorAttachments[3].pixelFormat = .rgba8Unorm // Blend 3
-        psoDesc.colorAttachments[4].pixelFormat = .rgba32Float // Depth
-        psoDesc.label = "Blend PSO"
-        do {
-            self.psoBlend = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
             alert(String(describing: e))
@@ -270,14 +244,12 @@ class MyResource {
         }
         // Not perfect but simple Z-sort
         instanceMat.sort { (a, b) in
-            //a[2][3] > b[2][3]
-            // Wrong direction sort
-            a[2][3] < b[2][3]
+            a[2][3] > b[2][3]
         }
         self.instanceMat = device.makeBuffer(bytes: instanceMat, length: MemoryLayout<float3x4>.size * instanceMat.count, options: .cpuCacheModeWriteCombined)!
     }
     func available() -> Bool {
-        self.pso != nil && self.psoBlend != nil
+        self.pso != nil
     }
 }
 
@@ -318,14 +290,6 @@ class Metal: NSObject, MTKViewDelegate {
         //texDesc.pixelFormat = .depth32Float
         //texDesc.usage = [.renderTarget]
         //self.resource.zTex = self.device.makeTexture(descriptor: texDesc)
-        let texDesc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(size.width), height: Int(size.height), mipmapped: false)
-        texDesc.usage = [.renderTarget]
-        texDesc.storageMode = .memoryless
-        self.resource.blendLayer1 = self.device.makeTexture(descriptor: texDesc)!
-        self.resource.blendLayer2 = self.device.makeTexture(descriptor: texDesc)!
-        self.resource.blendLayer3 = self.device.makeTexture(descriptor: texDesc)!
-        texDesc.pixelFormat = .rgba32Float
-        self.resource.depthLayer = self.device.makeTexture(descriptor: texDesc)!
     }
     func draw(in view: MTKView) {
         if (!self.resource.available()) { return }
@@ -349,29 +313,12 @@ class Metal: NSObject, MTKViewDelegate {
         passDesc.colorAttachments[0].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 1.0)
         passDesc.colorAttachments[0].loadAction = .clear
         passDesc.colorAttachments[0].storeAction = .store
-        passDesc.colorAttachments[1].clearColor = MTLClearColorMake(0, 0, 0, 0)
-        passDesc.colorAttachments[1].loadAction = .clear
-        passDesc.colorAttachments[1].storeAction = .dontCare
-        passDesc.colorAttachments[1].texture = self.resource.blendLayer1
-        passDesc.colorAttachments[2].clearColor = MTLClearColorMake(0, 0, 0, 0)
-        passDesc.colorAttachments[2].loadAction = .clear
-        passDesc.colorAttachments[2].storeAction = .dontCare
-        passDesc.colorAttachments[2].texture = self.resource.blendLayer2
-        passDesc.colorAttachments[3].clearColor = MTLClearColorMake(0, 0, 0, 0)
-        passDesc.colorAttachments[3].loadAction = .clear
-        passDesc.colorAttachments[3].storeAction = .dontCare
-        passDesc.colorAttachments[3].texture = self.resource.blendLayer3
-        passDesc.colorAttachments[4].clearColor = MTLClearColorMake(0, 0, 0, 0)
-        passDesc.colorAttachments[4].loadAction = .clear // Depth layer texture's 0.0 value means "no fragments"
-        passDesc.colorAttachments[4].storeAction = .dontCare
-        passDesc.colorAttachments[4].texture = self.resource.depthLayer
         //passDesc.depthAttachment.clearDepth = 0.0
         //passDesc.depthAttachment.loadAction = .clear
         //passDesc.depthAttachment.storeAction = .dontCare
         //passDesc.depthAttachment.texture = self.resource.zTex
         let enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
         enc.label = "Scene Pass"
-        // Draw OIT layers
         enc.setRenderPipelineState(self.resource.pso!)
         enc.setCullMode(.back)
         enc.setTriangleFillMode(.fill)
@@ -380,9 +327,6 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
         enc.setVertexBuffer(self.resource.instanceMat, offset: 0, index: 2)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: InstanceCount)
-        // Merge OIT layers with blending
-        enc.setRenderPipelineState(self.resource.psoBlend!)
-        enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         enc.endEncoding()
         //enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         //enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)
