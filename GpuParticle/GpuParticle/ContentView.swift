@@ -147,10 +147,10 @@ class MyResource {
     var psoSpawn: MTLComputePipelineState?
     var psoGenIndirectArgs: MTLComputePipelineState?
     var psoUpdate: MTLComputePipelineState?
-    var vb: MTLBuffer
-    var ib: MTLBuffer
-    var vbPlane: MTLBuffer
-    var ibPlane: MTLBuffer
+    //var vb: MTLBuffer
+    //var ib: MTLBuffer
+    //var vbPlane: MTLBuffer
+    //var ibPlane: MTLBuffer
     var cbScene: [MTLBuffer]
     var zTex: MTLTexture?
     var depthState: MTLDepthStencilState
@@ -197,47 +197,47 @@ class MyResource {
             print(e)
             alert(String(describing: e))
         }
-        // Create a sphere
-        var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
-            initializedCount = 0
-        })
-        for y in 0...SPHERE_STACKS {
-            for x in 0...SPHERE_SLICES {
-                let v0 = Float(x) / Float(SPHERE_SLICES)
-                let v1 = Float(y) / Float(SPHERE_STACKS)
-                let theta = 2.0 * Float.pi * v0
-                let phi = 2.0 * Float.pi * v1 / 2.0
-                let pos = MTLPackedFloat3Make(sin(phi) * sin(theta), cos(phi), sin(phi) * cos(theta))
-                let r = Float(1.0)
-                let norm = MTLPackedFloat3Make(pos.x / r, pos.y / r, pos.z / r)
-                vbData.append(VertexElement(pos, norm))
-            }
-        }
-        self.vb = device.makeBuffer(bytes: vbData, length: MemoryLayout<VertexElement>.size * vbData.count, options: .cpuCacheModeWriteCombined)!
-        var ibData = [QuadIndexList](unsafeUninitializedCapacity: (SPHERE_STACKS * SPHERE_SLICES), initializingWith: { buffer, initializedCount in
-            initializedCount = 0
-        })
-        for y in 0..<SPHERE_STACKS {
-            for x in 0..<SPHERE_SLICES {
-                let b = UInt16(y * (SPHERE_SLICES + 1) + x)
-                let s = UInt16(SPHERE_SLICES + 1)
-                ibData.append(QuadIndexList(b, b + s, b + 1, b + s, b + s + 1, b + 1))
-            }
-        }
-        self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: .cpuCacheModeWriteCombined)!
-        
-        // Create a plane
-        let vbPlaneData: [VertexElement] = [
-            VertexElement(MTLPackedFloat3Make(-1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-            VertexElement(MTLPackedFloat3Make( 1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-            VertexElement(MTLPackedFloat3Make(-1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-            VertexElement(MTLPackedFloat3Make( 1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-        ]
-        self.vbPlane = device.makeBuffer(bytes: vbPlaneData, length: MemoryLayout<VertexElement>.size * vbPlaneData.count, options: .cpuCacheModeWriteCombined)!
-        let ibPlaneData: [QuadIndexList] = [
-            QuadIndexList(0, 1, 2, 2, 1, 3)
-        ]
-        self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
+//        // Create a sphere
+//        var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
+//            initializedCount = 0
+//        })
+//        for y in 0...SPHERE_STACKS {
+//            for x in 0...SPHERE_SLICES {
+//                let v0 = Float(x) / Float(SPHERE_SLICES)
+//                let v1 = Float(y) / Float(SPHERE_STACKS)
+//                let theta = 2.0 * Float.pi * v0
+//                let phi = 2.0 * Float.pi * v1 / 2.0
+//                let pos = MTLPackedFloat3Make(sin(phi) * sin(theta), cos(phi), sin(phi) * cos(theta))
+//                let r = Float(1.0)
+//                let norm = MTLPackedFloat3Make(pos.x / r, pos.y / r, pos.z / r)
+//                vbData.append(VertexElement(pos, norm))
+//            }
+//        }
+//        self.vb = device.makeBuffer(bytes: vbData, length: MemoryLayout<VertexElement>.size * vbData.count, options: .cpuCacheModeWriteCombined)!
+//        var ibData = [QuadIndexList](unsafeUninitializedCapacity: (SPHERE_STACKS * SPHERE_SLICES), initializingWith: { buffer, initializedCount in
+//            initializedCount = 0
+//        })
+//        for y in 0..<SPHERE_STACKS {
+//            for x in 0..<SPHERE_SLICES {
+//                let b = UInt16(y * (SPHERE_SLICES + 1) + x)
+//                let s = UInt16(SPHERE_SLICES + 1)
+//                ibData.append(QuadIndexList(b, b + s, b + 1, b + s, b + s + 1, b + 1))
+//            }
+//        }
+//        self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: .cpuCacheModeWriteCombined)!
+//
+//        // Create a plane
+//        let vbPlaneData: [VertexElement] = [
+//            VertexElement(MTLPackedFloat3Make(-1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+//            VertexElement(MTLPackedFloat3Make( 1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+//            VertexElement(MTLPackedFloat3Make(-1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+//            VertexElement(MTLPackedFloat3Make( 1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
+//        ]
+//        self.vbPlane = device.makeBuffer(bytes: vbPlaneData, length: MemoryLayout<VertexElement>.size * vbPlaneData.count, options: .cpuCacheModeWriteCombined)!
+//        let ibPlaneData: [QuadIndexList] = [
+//            QuadIndexList(0, 1, 2, 2, 1, 3)
+//        ]
+//        self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
         
         self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 64, options: .cpuCacheModeWriteCombined)!, count: 2)
         
@@ -329,6 +329,7 @@ class Metal: NSObject, MTKViewDelegate {
         
         let numThreads = MTLSizeMake(64, 1, 1)
         let csEnc = cmdBuf.makeComputeCommandEncoder()!
+        csEnc.label = "Particle control pass"
         csEnc.setBuffer(self.resource.particleBuf[Int(frameCount & 1)], offset: 0, index: 0)
         csEnc.setBuffer(self.resource.indirectArgsComputeBuf, offset: 0, index: 1)
         csEnc.setBuffer(self.resource.countBuf1, offset: 0, index: 2)
@@ -347,6 +348,7 @@ class Metal: NSObject, MTKViewDelegate {
         csEnc.endEncoding()
         
         let bltEnc2 = cmdBuf.makeBlitCommandEncoder()!
+        bltEnc2.label = "Counter copy and clear"
         // Copy draw indirect args
         bltEnc2.copy(from: self.resource.countBuf2, sourceOffset: 0, to: self.resource.indirectArgsRenderBuf, destinationOffset: 4, size: 4)
         // Copy count
