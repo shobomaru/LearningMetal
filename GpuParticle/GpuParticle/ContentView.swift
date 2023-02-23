@@ -283,6 +283,9 @@ class Metal: NSObject, MTKViewDelegate {
             parent.enqueueAlert("Metal3 GPU family needed")
         }
         #endif
+        if !device.supportsFamily(.apple7) {
+            parent.enqueueAlert("SIMD-scoped reduction needed (Apple7+)")
+        }
         self.cmdQueue = self.device.makeCommandQueue()!
         self.resource = MyResource(device: device, alert: { (s: String) -> Void  in
             parent.enqueueAlert(s)
