@@ -21,6 +21,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./BloomCS
+      - name: Build (BloomLossyCompression)
+        run: |
+          xcodebuild -configuration release -sdk iphonesimulator
+        working-directory: ./BloomLossyCompression
       - name: Cache (FCRNFP16.mlmodel)
         id: cache-fcrnfp16-mlmodel
         uses: actions/cache@v3
