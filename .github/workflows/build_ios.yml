@@ -41,6 +41,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./CrashDebug
+      - name: Build (GpuParticle)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./GpuParticle
       - name: Build (RaytracingPipeline)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
