@@ -2,12 +2,12 @@ import SwiftUI
 import MetalKit
 import simd
 
-// Time for 1st blur pass
-// iPad mini A15 (1024x1024)
-//   Lossless compression: 6.82 - 7.80 ms, Lossy compression: 4.53 - 5.81 ms (RGBA32Float)
-//   Lossless compression: 5.41 ms, Lossy compression: 3.70 - 4.80 ms (RGBA16Float)
-//   Lossless compression: 5.34 ms, Lossy compression: 3.90 - 5.33 ms (RGBA8Unorm)
-//   Lossless compression: 5.31 ms, Lossy compression: 2.95 - 5.13 ms (BGR10A2Unorm)
+// GPU Time of the 1st blur pass
+// iPad mini A15 (1024x1024, GPU Performance State: Medium)
+//   Lossless compression: 3.53 ms, Lossy compression: 3.42 ms (RGBA32Float)
+//   Lossless compression: 2.26 ms, Lossy compression: 2.22 ms (RGBA16Float)
+//   Lossless compression: 2.23 ms, Lossy compression: 2.23 ms (BGR10A2Unorm)
+//   Lossless compression: 2.23 ms, Lossy compression: 2.23 ms (RGBA8Unorm)
 let LossyCompression = true
 let ColorFormat = MTLPixelFormat.rgba16Float
 let BloomTexSize = 1024
