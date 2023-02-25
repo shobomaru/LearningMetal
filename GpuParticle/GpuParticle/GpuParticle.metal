@@ -96,16 +96,19 @@ kernel void gpuParticleUpdateCS(ushort dtid [[thread_position_in_grid]],
     uint idx = atomic_fetch_add_explicit(outNumParticles, 1, memory_order_relaxed);
 #else
     simd_vote vote = simd_active_threads_mask();
-    uint vote2 = ((simd_vote::vote_t)vote & 0xFFffFFff); // TODO: Find correct casting
     simdgroup_barrier(mem_flags::mem_none);
     
-    // The shader statistics says (A) is less instructions than (B)
+    // Currently Apple GPU has 32 SIMD lane, but consider 64 SIMD lane just in case
+    uint2 vote2 = uint2((simd_vote::vote_t)vote & 0xFFffFFff, (simd_vote::vote_t)vote >> 32);
+    
+    // The shader statistics says (A) has 3 less instructions than (B)
     uint prefixIdx = simd_prefix_exclusive_sum(1u); // (A)
-    //uint prefixIdx = popcount(vote2 & ~((1u << sid) - 1u)); // (B)
+    //uint prefixIdx = popcount(vote2.x & ~((1u << sid) - 1u)); // (B)
+    //prefixIdx += (sid >= 32) ? popcount(vote2.y & ~((1u << (sid - 32)) - 1u)) : 0; // (B)
     
     uint idxBase = 0;
     if (simd_is_first()) {
-        uint count = popcount(vote2);
+        uint count = popcount(vote2.x) + popcount(vote2.y);
         idxBase = atomic_fetch_add_explicit(outNumParticles, count, memory_order_relaxed);
     }
     idxBase = simd_broadcast_first(idxBase);
