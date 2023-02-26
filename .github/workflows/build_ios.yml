@@ -53,6 +53,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./GpuParticleSparseBindingBuffer
+      - name: Build (MeshShader)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./MeshShader
       - name: Build (RaytracingPipeline)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
