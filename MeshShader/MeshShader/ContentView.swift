@@ -124,7 +124,8 @@ struct Meshlet {
     var primitiveCount: UInt32 = 0
     var positions = [MTLPackedFloat3](repeating: MTLPackedFloat3Make(0 / 0.0, 0, 0), count: MaxVerticesPerMeshlet)
     var normals = [MTLPackedFloat3](repeating: MTLPackedFloat3Make(0 / 0.0, 0, 0), count: MaxVerticesPerMeshlet)
-    var indices = [UInt16](repeating: 0xFFFF, count: NumPrimiticesPerMeshlet * 3)
+    var indices = [UInt8](repeating: 0xFF, count: NumPrimiticesPerMeshlet * 3)
+    var vertexCount: UInt32 = 0
     init() {
     }
     func convertGpuData() -> [UInt32] {
@@ -132,8 +133,8 @@ struct Meshlet {
         let meshletDataSize = MemoryLayout<UInt32>.size
             + MemoryLayout<MTLPackedFloat3>.size * MaxVerticesPerMeshlet
             + MemoryLayout<MTLPackedFloat3>.size * MaxVerticesPerMeshlet
-            + MemoryLayout<UInt16>.size * (NumPrimiticesPerMeshlet * 3)
-            + MemoryLayout<UInt32>.size
+            + MemoryLayout<UInt8>.size * (NumPrimiticesPerMeshlet * 3)
+            + MemoryLayout<UInt32>.size * 4
         var data = [UInt32](repeating: 0, count: (meshletDataSize / MemoryLayout<UInt32>.size))
         data[0] = self.primitiveCount
         var offset = 1
@@ -149,20 +150,31 @@ struct Meshlet {
             data[offset + i * 3 + 2] = self.normals[i].z.bitPattern
         }
         offset += 3 * MaxVerticesPerMeshlet
-        for i in 0..<Int(self.primitiveCount) {
-            if (i % 2) == 0 {
-                data[offset + 3 * (i / 2)] = UInt32(self.indices[3 * i + 1]) << 16 | UInt32(self.indices[3 * i])
-                data[offset + 3 * (i / 2) + 1] = UInt32(self.indices[3 * i + 2])
-            }
-            else {
-                data[offset + 3 * (i / 2) + 1] |= UInt32(self.indices[3 * i]) << 16
-                data[offset + 3 * (i / 2) + 2] = UInt32(self.indices[3 * i + 2]) << 16 | UInt32(self.indices[3 * i + 1])
-            }
+        for i in 0..<Int(self.primitiveCount / 4) {
+            data[offset + 3 * i] = UInt32(self.indices[12 * i]) | UInt32(self.indices[12 * i + 1]) << 8 | UInt32(self.indices[12 * i + 2]) << 16 | UInt32(self.indices[12 * i + 3]) << 24
+            data[offset + 3 * i + 1] = UInt32(self.indices[12 * i + 4]) | UInt32(self.indices[12 * i + 5]) << 8 | UInt32(self.indices[12 * i + 6]) << 16 | UInt32(self.indices[12 * i + 7]) << 24
+            data[offset + 3 * i + 2] = UInt32(self.indices[12 * i + 8]) | UInt32(self.indices[12 * i + 9]) << 8 | UInt32(self.indices[12 * i + 10]) << 16 | UInt32(self.indices[12 * i + 11]) << 24
         }
-        assert(NumPrimiticesPerMeshlet % 2 == 0) // TODO:
-        offset += (NumPrimiticesPerMeshlet / 2) * 3
-        data[offset] = 0x10BECEE1
-        offset += 1
+        let idx = Int(self.primitiveCount / 4)
+        if (self.primitiveCount % 4) >= 1 {
+            data[offset + 3 * idx] = UInt32(self.indices[Int(3 * idx)]) | UInt32(self.indices[Int(3 * idx + 1)]) << 8 | UInt32(self.indices[Int(3 * idx + 2)]) << 16
+        }
+        if (self.primitiveCount % 4) >= 2 {
+            data[offset + 3 * idx] |= UInt32(self.indices[Int(3 * idx + 3)])
+            data[offset + 3 * idx + 1] = UInt32(self.indices[Int(3 * idx + 4)]) | UInt32(self.indices[Int(3 * idx + 5)]) << 8
+        }
+        if (self.primitiveCount % 4) >= 3 {
+            data[offset + 3 * idx + 1] |= UInt32(self.indices[Int(3 * idx + 6)]) << 16 | UInt32(self.indices[Int(3 * idx + 7)]) << 24
+            data[offset + 3 * idx + 2] = UInt32(self.indices[Int(3 * idx + 8)])
+        }
+        // TODO:
+        assert(NumPrimiticesPerMeshlet % 4 == 0)
+        offset += (NumPrimiticesPerMeshlet / 4) * 3
+        data[offset] = UInt32(self.vertexCount)
+        data[offset + 1] = 0x10BECEE1
+        data[offset + 2] = 0x10BECEE1
+        data[offset + 3] = 0x10BECEE1
+        offset += 4
         return data
     }
 }
@@ -194,6 +206,8 @@ class MyResource {
     var zTex: MTLTexture?
     var depthState: MTLDepthStencilState
     var instanceMat: MTLBuffer
+    let verticesPerThread = 2 // numThreads * verticesPerThread = MaxVerticesPerMeshlet
+    let numThreads = MTLSizeMake((MaxVerticesPerMeshlet + 1) / 2, 1, 1)
     init(device: MTLDevice, alert: (String) -> Void) {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let ms = lib.makeFunction(name: "sceneMS") else { fatalError() }
@@ -203,9 +217,13 @@ class MyResource {
         psoDesc.fragmentFunction = fs
         psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm
         psoDesc.depthAttachmentPixelFormat = .depth32Float
+        psoDesc.meshThreadgroupSizeIsMultipleOfThreadExecutionWidth = true
         psoDesc.label = "Scene PSO"
         do {
             self.psoMS = try device.makeRenderPipelineState(descriptor: psoDesc, options: []).0
+            if self.numThreads.width % self.psoMS!.meshThreadExecutionWidth != 0 {
+                fatalError()
+            }
         } catch let e {
             print(e)
             alert(String(describing: e))
@@ -308,11 +326,15 @@ class MyResource {
                 idx[6 * i + 5] = indices[inQuadCount + i].v5
             }
             inQuadCount += quadCount
-            // Convert original indices to zero based indices
+            // Convert original 16bit indices to zero based 8bit indices
             let minIdx = idx[0..<(6 * quadCount)].min()!
-            let idx2 = idx.map { $0 - minIdx }
-            // TODO: Index compaction
-            assert(idx2.max()! < MaxVerticesPerMeshlet)
+            let idx2: [UInt8] = idx.map {
+                let v = $0 - minIdx
+                // TODO: Index compaction
+                assert(v < MaxVerticesPerMeshlet)
+                assert(v <= UInt8.max) // If you want primitive restart, this number should be -1
+                return UInt8(v)
+            }
             var ms = Meshlet()
             ms.indices[0..<idx2.count] = idx2[0..<idx2.count]
             // Load vertices
@@ -322,6 +344,7 @@ class MyResource {
                 ms.normals[Int(idx2[i])] = v.normal
             }
             ms.primitiveCount = UInt32(quadCount * 2)
+            ms.vertexCount = UInt32(idx2.max()!) + 1
             meshlets.append(ms)
         }
         return meshlets
@@ -331,8 +354,8 @@ class MyResource {
     }
 }
 
-let SPHERE_STACKS: Int = 10
-let SPHERE_SLICES: Int = 12
+let SPHERE_STACKS: Int = 20
+let SPHERE_SLICES: Int = 24
 
 class Metal: NSObject, MTKViewDelegate {
     var parent: ContentView2
@@ -404,8 +427,7 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setMeshBuffer(self.resource.meshlet, offset: 0, index: 0)
         enc.setMeshBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 1)
         enc.setMeshBuffer(self.resource.instanceMat, offset: 0, index: 2)
-        let numThreads = MTLSizeMake(256, 1, 1)
-        enc.drawMeshThreadgroups(MTLSizeMake(3/*meshlet per instance*/, InstanceCount, 1), threadsPerObjectThreadgroup: numThreads, threadsPerMeshThreadgroup: numThreads)
+        enc.drawMeshThreadgroups(MTLSizeMake(self.resource.meshletCount, InstanceCount, 1), threadsPerObjectThreadgroup: self.resource.numThreads, threadsPerMeshThreadgroup: self.resource.numThreads)
         enc.endEncoding()
         //enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         //enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)
