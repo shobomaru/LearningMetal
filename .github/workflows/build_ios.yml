@@ -59,7 +59,7 @@ jobs:
         working-directory: ./MeshShader
       - name: Build (MeshShaderObjectShader)
         run: |
-          xcodebuild -condiguration Release -sdk iphonesimulator
+          xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./MeshShaderObjectShader
       - name: Build (RaytracingPipeline)
         run: |
