@@ -378,7 +378,11 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setCullMode(.back)
         enc.setDepthStencilState(self.resource.depthState)
         // declare using
-        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex, self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane], usage: .read, stages: .vertex)
+        // DO NOT FORGET TO ADD YOUR ARGUMENT BUFFER!!
+        enc.useResources([self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane], usage: .read, stages: [.vertex])
+        enc.useResources([self.resource.argScene[frameIndex], self.resource.cbScene[frameIndex]], usage: .read, stages: [.vertex, .fragment])
+        enc.useResource(self.resource.shadowTex, usage: .read, stages: [.fragment])
+        
         // Encode ICB
         let icb = self.resource.icbScene[frameIndex]
         icb.reset(0..<icb.size)
@@ -396,6 +400,7 @@ class Metal: NSObject, MTKViewDelegate {
         ae.setTexture(self.resource.shadowTex, index: 1)
         ae.setSamplerState(self.resource.shadowSS, index: 2)
         #endif
+        
         let irb = icb.indirectRenderCommandAt(0)
         irb.setVertexBuffer(self.resource.vb, offset: 0, at: 0)
         irb.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
@@ -407,9 +412,9 @@ class Metal: NSObject, MTKViewDelegate {
         irb1.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
         irb1.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
         irb1.drawIndexedPrimitives(.triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 0)
+        
         enc.executeCommandsInBuffer(icb, range: 0..<icb.size)
         enc.endEncoding()
-        
         cmdBuf.present(currentDrawable)
         cmdBuf.addCompletedHandler {[weak self, weak cmdBuf] _ in
             self?.sema.signal()

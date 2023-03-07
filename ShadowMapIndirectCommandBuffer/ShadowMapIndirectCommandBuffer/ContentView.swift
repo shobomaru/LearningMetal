@@ -288,7 +288,17 @@ class MyResource {
         icbSceneDesc.maxFragmentBufferBindCount = 10
         self.icbScene = [MTLIndirectCommandBuffer](repeating: device.makeIndirectCommandBuffer(descriptor: icbSceneDesc, maxCommandCount: 10)!, count: 2)
         
-        self.icbArgScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<MTLResourceID>.size * 2, options: .cpuCacheModeWriteCombined)!, count: 2)
+        struct ICBContainer {
+            var icb : MTLResourceID
+            var pso : MTLResourceID
+            var vb: UInt64
+            var vbPlane: UInt64
+            var ib: UInt64
+            var ibPlane: UInt64
+            var argScene0: UInt64
+            var argScene1: UInt64
+        }
+        self.icbArgScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<ICBContainer>.size, options: .cpuCacheModeWriteCombined)!, count: 2)
         // Set arguments beforehand
         for i in 0..<self.icbArgScene.count {
             #if false
@@ -297,13 +307,15 @@ class MyResource {
             ae.setArgumentBuffer(self.icbArgScene[i], offset: 0) // destination
             ae.setIndirectCommandBuffer(self.icbScene[i], index: 0)
             ae.setRenderPipelineState(self.pso, index: 1)
+            ae.setBuffer(self.vb, offset: 0, index: 2)
+            ae.setBuffer(self.vbPlane, offset: 0, index: 3)
+            ae.setBuffer(self.ib, offset: 0, index: 4)
+            ae.setBuffer(self.ibPlane, offset: 0, index: 5)
+            ae.setBuffer(self.argScene[0], offset: 0, index: 6)
+            ae.setBuffer(self.argScene[1], offset: 0, index: 7)
             #else
             // Metal3
-            struct ICBContainer {
-                var icb : MTLResourceID
-                var pso : MTLResourceID
-            }
-            var arg = ICBContainer(icb: self.icbScene[i].gpuResourceID, pso: self.pso!.gpuResourceID)
+            var arg = ICBContainer(icb: self.icbScene[i].gpuResourceID, pso: self.pso!.gpuResourceID, vb: self.vb.gpuAddress, vbPlane: self.vbPlane.gpuAddress, ib: self.ib.gpuAddress, ibPlane: self.ibPlane.gpuAddress, argScene0: self.argScene[0].gpuAddress, argScene1: self.argScene[1].gpuAddress)
             self.icbArgScene[i].contents().copyMemory(from: withUnsafePointer(to: &arg) { UnsafeRawPointer($0) }, byteCount: MemoryLayout<ICBContainer>.size)
             #endif
         }
@@ -401,10 +413,8 @@ class Metal: NSObject, MTKViewDelegate {
         csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
         csEnc.setComputePipelineState(self.resource.psoICB!)
         csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
-        csEnc.setBytes([self.resource.vb.gpuAddress, self.resource.vbPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 1)
-        csEnc.setBytes([self.resource.ib.gpuAddress, self.resource.ibPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 2)
-        csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 3)
-        csEnc.setBytes([self.resource.argScene[frameIndex].gpuAddress], length: MemoryLayout<UInt64>.size, index: 4)
+        csEnc.setBytes([UInt32(frameIndex)], length: MemoryLayout<UInt32>.size * 2, index: 1)
+        csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 2)
         csEnc.dispatchThreads(MTLSizeMake(icbSize, 1, 1), threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
         csEnc.endEncoding()
         
@@ -447,7 +457,9 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setDepthStencilState(self.resource.depthState)
         // declare using
         // DO NOT FORGET ALL RESOURCE BOUNDS, OR YOU WILL GET INVALID RESOURCES ONLY IN THE METAL GPU DEBUGGER!!!
-        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex, self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane, self.resource.argScene[frameIndex]], usage: .read, stages: .vertex)
+        enc.useResources([self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane], usage: .read, stages: [.vertex])
+        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex, self.resource.argScene[frameIndex]], usage: .read, stages: [.vertex, .fragment])
+        enc.useResource(self.resource.shadowTex, usage: .read, stages: [.fragment])
         // No bindings here, already done by GPU
         enc.executeCommandsInBuffer(icb, range: 0..<icbSize)
         enc.endEncoding()

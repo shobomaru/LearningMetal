@@ -384,8 +384,8 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, index: 1)
         enc.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, index: 1)
         // declare using
-        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .vertex)
-        //enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .fragment) // need this?
+        enc.useResource(self.resource.cbScene[frameIndex], usage: .read, stages: [.vertex, .fragment])
+        enc.useResource(self.resource.shadowTex, usage: .read, stages: [.fragment])
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1)
         enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)

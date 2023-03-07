@@ -407,9 +407,6 @@ class Metal: NSObject, MTKViewDelegate {
         #else
         blitEnc = cmdBuf.makeBlitCommandEncoder()!
         blitEnc.label = "Clear GpuCommandBuffer"
-        if DisableTracking == false {
-            blitEnc.waitForFence(self.resource.fence)
-        }
         blitEnc.resetCommandsInBuffer(icb, range: 0..<icbSize)
         if DisableTracking == false {
             blitEnc.updateFence(self.resource.fence)
@@ -465,6 +462,7 @@ class Metal: NSObject, MTKViewDelegate {
         // Shadow pass has no dependencies
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)
         if DisableTracking == false {
+            // Get a new fence
             enc.updateFence(self.resource.fenceShadowPass, after: .fragment)
         }
         enc.endEncoding()
@@ -484,17 +482,15 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setDepthStencilState(self.resource.depthState)
         // declare using
         // DO NOT FORGET ALL RESOURCE BOUNDS, OR YOU WILL GET INVALID RESOURCES ONLY IN THE METAL GPU DEBUGGER!!!
-        enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex, self.resource.argScene[frameIndex]], usage: .read, stages: .vertex)
-        //enc.useResources([self.resource.cbScene[frameIndex], self.resource.shadowTex], usage: .read, stages: .fragment) // need this?
+        enc.useResources([self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane], usage: .read, stages: [.vertex])
+        enc.useResources([self.resource.cbScene[frameIndex], self.resource.argScene[frameIndex]], usage: .read, stages: [.vertex, .fragment])
+        enc.useResource(self.resource.shadowTex, usage: .read, stages: [.fragment])
         if DisableTracking == false {
             enc.waitForFence(self.resource.fence, before: .vertex)
             enc.waitForFence(self.resource.fenceShadowPass, before: .fragment) // The vertex shader does not access the shadow map
         }
         // No bindings here, already done by GPU
         enc.executeCommandsInBuffer(icb, range: 0..<icbSize)
-        if DisableTracking == false {
-            enc.updateFence(self.resource.fence, after: .fragment)
-        }
         enc.endEncoding()
         
         cmdBuf.present(currentDrawable)
