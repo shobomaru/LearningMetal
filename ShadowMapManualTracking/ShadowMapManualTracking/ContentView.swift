@@ -2,7 +2,8 @@ import SwiftUI
 import MetalKit
 import simd
 
-let DisableTracking = false
+let UserTracking = true
+let IndirectCommandEncoder = false
 
 struct ContentView: View {
     @State private var message = "default"
@@ -243,7 +244,8 @@ class MyResource {
                 ibData.append(QuadIndexList(b, b + s, b + 1, b + s, b + s + 1, b + 1))
             }
         }
-        self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!
+        let hazardTrackingMode = UserTracking ? MTLResourceOptions.hazardTrackingModeUntracked : MTLResourceOptions.hazardTrackingModeTracked
+        self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!
         
         // Create a plane
         let vbPlaneData: [VertexElement] = [
@@ -252,14 +254,14 @@ class MyResource {
             VertexElement(MTLPackedFloat3Make(-1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
             VertexElement(MTLPackedFloat3Make( 1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
         ]
-        self.vbPlane = device.makeBuffer(bytes: vbPlaneData, length: MemoryLayout<VertexElement>.size * vbPlaneData.count, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!
+        self.vbPlane = device.makeBuffer(bytes: vbPlaneData, length: MemoryLayout<VertexElement>.size * vbPlaneData.count, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!
         let ibPlaneData: [QuadIndexList] = [
             QuadIndexList(0, 1, 2, 2, 1, 3)
         ]
-        self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!
+        self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!
         
-        self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!, count: 2)
-        self.cbShadow = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!, count: 2)
+        self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
+        self.cbShadow = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
         
         let dsDesc = MTLDepthStencilDescriptor()
         dsDesc.depthCompareFunction = .greaterEqual
@@ -273,7 +275,7 @@ class MyResource {
         texDesc.storageMode = .private
         texDesc.pixelFormat = .depth32Float
         texDesc.usage = [.renderTarget, .shaderRead]
-        texDesc.hazardTrackingMode = .untracked
+        texDesc.hazardTrackingMode = UserTracking ? .untracked : .tracked
         self.shadowTex = device.makeTexture(descriptor: texDesc)!
         
         let ssDesc = MTLSamplerDescriptor()
@@ -283,7 +285,7 @@ class MyResource {
         ssDesc.supportArgumentBuffers = true // THIS IS VERY IMPORTANT!!! IF YOU FORGET, WILL GET A GPU FAULT!!!
         self.shadowSS = device.makeSamplerState(descriptor: ssDesc)!
         
-        self.argScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<SceneMetalArgs>.size, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!, count: 2)
+        self.argScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<SceneMetalArgs>.size, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
         
         let icbSceneDesc = MTLIndirectCommandBufferDescriptor()
         icbSceneDesc.commandTypes = .drawIndexed
@@ -293,7 +295,17 @@ class MyResource {
         icbSceneDesc.maxFragmentBufferBindCount = 10
         self.icbScene = [MTLIndirectCommandBuffer](repeating: device.makeIndirectCommandBuffer(descriptor: icbSceneDesc, maxCommandCount: 10)!, count: 2)
         
-        self.icbArgScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<MTLResourceID>.size * 2, options: [.cpuCacheModeWriteCombined, .hazardTrackingModeUntracked])!, count: 2)
+        struct ICBContainer {
+            var icb : MTLResourceID
+            var pso : MTLResourceID
+            var vb: UInt64
+            var vbPlane: UInt64
+            var ib: UInt64
+            var ibPlane: UInt64
+            var argScene0: UInt64
+            var argScene1: UInt64
+        }
+        self.icbArgScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<ICBContainer>.size, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
         // Set arguments beforehand
         for i in 0..<self.icbArgScene.count {
             #if false
@@ -302,13 +314,15 @@ class MyResource {
             ae.setArgumentBuffer(self.icbArgScene[i], offset: 0) // destination
             ae.setIndirectCommandBuffer(self.icbScene[i], index: 0)
             ae.setRenderPipelineState(self.pso, index: 1)
+            ae.setBuffer(self.vb, offset: 0, index: 2)
+            ae.setBuffer(self.vbPlane, offset: 0, index: 3)
+            ae.setBuffer(self.ib, offset: 0, index: 4)
+            ae.setBuffer(self.ibPlane, offset: 0, index: 5)
+            ae.setBuffer(self.argScene[0], offset: 0, index: 6)
+            ae.setBuffer(self.argScene[1], offset: 0, index: 7)
             #else
             // Metal3
-            struct ICBContainer {
-                var icb : MTLResourceID
-                var pso : MTLResourceID
-            }
-            var arg = ICBContainer(icb: self.icbScene[i].gpuResourceID, pso: self.pso!.gpuResourceID)
+            var arg = ICBContainer(icb: self.icbScene[i].gpuResourceID, pso: self.pso!.gpuResourceID, vb: self.vb.gpuAddress, vbPlane: self.vbPlane.gpuAddress, ib: self.ib.gpuAddress, ibPlane: self.ibPlane.gpuAddress, argScene0: self.argScene[0].gpuAddress, argScene1: self.argScene[1].gpuAddress)
             self.icbArgScene[i].contents().copyMemory(from: withUnsafePointer(to: &arg) { UnsafeRawPointer($0) }, byteCount: MemoryLayout<ICBContainer>.size)
             #endif
         }
@@ -399,49 +413,72 @@ class Metal: NSObject, MTKViewDelegate {
         let icb = self.resource.icbScene[frameIndex]
         let icbSize = 2 // TODO: you may want to count actual draw call
         
-        // You can reset ICB using CPU
-        var blitEnc: MTLBlitCommandEncoder;
-        #if false
-        icb.reset(0..<icbSize)
-        // or GPU
-        #else
-        blitEnc = cmdBuf.makeBlitCommandEncoder()!
-        blitEnc.label = "Clear GpuCommandBuffer"
-        blitEnc.resetCommandsInBuffer(icb, range: 0..<icbSize)
-        if DisableTracking == false {
-            blitEnc.updateFence(self.resource.fence)
+        if IndirectCommandEncoder {
+            var blitEnc: MTLBlitCommandEncoder;
+            blitEnc = cmdBuf.makeBlitCommandEncoder()!
+            blitEnc.label = "Clear GpuCommandBuffer"
+            blitEnc.resetCommandsInBuffer(icb, range: 0..<icbSize)
+            if UserTracking {
+                blitEnc.updateFence(self.resource.fence)
+            }
+            blitEnc.endEncoding()
+            
+            let csEncDesc = MTLComputePassDescriptor()
+            if UserTracking {
+                csEncDesc.dispatchType = .concurrent // Allow merging multiple compute passes
+            }
+            let csEnc = cmdBuf.makeComputeCommandEncoder(descriptor: csEncDesc)!
+            csEnc.label = "GpuCommandBuffer"
+            if UserTracking {
+                csEnc.waitForFence(self.resource.fence)
+            }
+            csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
+            csEnc.setComputePipelineState(self.resource.psoICB!)
+            csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
+            csEnc.setBytes([UInt32(frameIndex)], length: MemoryLayout<UInt32>.size, index: 1)
+            csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 2)
+            csEnc.dispatchThreads(MTLSizeMake(icbSize, 1, 1), threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
+            if UserTracking {
+                csEnc.updateFence(self.resource.fence)
+            }
+            csEnc.endEncoding()
+            
+            blitEnc = cmdBuf.makeBlitCommandEncoder()!
+            blitEnc.label = "Optimize GpuCommand Buffer"
+            if UserTracking {
+                blitEnc.waitForFence(self.resource.fence)
+            }
+            blitEnc.optimizeIndirectCommandBuffer(icb, range: 0..<icbSize)
+            if UserTracking {
+                blitEnc.updateFence(self.resource.fence)
+            }
+            blitEnc.endEncoding()
         }
-        blitEnc.endEncoding()
-        #endif
-        
-        let csEnc = cmdBuf.makeComputeCommandEncoder()!
-        csEnc.label = "GpuCommandBuffer"
-        if DisableTracking == false {
-            csEnc.waitForFence(self.resource.fence)
+        else {
+            icb.reset(0..<icbSize)
+            
+            let irb = icb.indirectRenderCommandAt(0)
+            irb.setVertexBuffer(self.resource.vb, offset: 0, at: 0)
+            irb.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
+            irb.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
+            irb.drawIndexedPrimitives(.triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 0)
+            let irb1 = icb.indirectRenderCommandAt(1)
+            irb1.setVertexBuffer(self.resource.vbPlane, offset: 0, at: 0)
+            // Buffer inheritance is disabled so we set same buffers
+            irb1.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
+            irb1.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
+            irb1.drawIndexedPrimitives(.triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 0)
+            
+            var argScene = SceneMetalArgs(cbScene: self.resource.cbScene[frameIndex].gpuAddress, shadowMap: self.resource.shadowTex.gpuResourceID, shadowSS: self.resource.shadowSS.gpuResourceID)
+            self.resource.argScene[frameIndex].contents().copyMemory(from: withUnsafePointer(to: &argScene) { UnsafeRawPointer($0) }, byteCount: MemoryLayout<SceneMetalArgs>.size)
+            
+            if UserTracking {
+                let blitEnc = cmdBuf.makeBlitCommandEncoder()!
+                blitEnc.label = "Signal handler"
+                blitEnc.updateFence(self.resource.fence)
+                blitEnc.endEncoding()
+            }
         }
-        csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
-        csEnc.setComputePipelineState(self.resource.psoICB!)
-        csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
-        csEnc.setBytes([self.resource.vb.gpuAddress, self.resource.vbPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 1)
-        csEnc.setBytes([self.resource.ib.gpuAddress, self.resource.ibPlane.gpuAddress], length: MemoryLayout<UInt64>.size * 2, index: 2)
-        csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 3)
-        csEnc.setBytes([self.resource.argScene[frameIndex].gpuAddress], length: MemoryLayout<UInt64>.size, index: 4)
-        csEnc.dispatchThreads(MTLSizeMake(icbSize, 1, 1), threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
-        if DisableTracking == false {
-            csEnc.updateFence(self.resource.fence)
-        }
-        csEnc.endEncoding()
-        
-        blitEnc = cmdBuf.makeBlitCommandEncoder()!
-        blitEnc.label = "Optimize GpuCommand Buffer"
-        if DisableTracking == false {
-            blitEnc.waitForFence(self.resource.fence)
-        }
-        blitEnc.optimizeIndirectCommandBuffer(icb, range: 0..<icbSize)
-        if DisableTracking == false {
-            blitEnc.updateFence(self.resource.fence)
-        }
-        blitEnc.endEncoding()
         
         // Draw
         
@@ -461,7 +498,7 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         // Shadow pass has no dependencies
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1)
-        if DisableTracking == false {
+        if UserTracking {
             // Get a new fence
             enc.updateFence(self.resource.fenceShadowPass, after: .fragment)
         }
@@ -485,7 +522,7 @@ class Metal: NSObject, MTKViewDelegate {
         enc.useResources([self.resource.vb, self.resource.vbPlane, self.resource.ib, self.resource.ibPlane], usage: .read, stages: [.vertex])
         enc.useResources([self.resource.cbScene[frameIndex], self.resource.argScene[frameIndex]], usage: .read, stages: [.vertex, .fragment])
         enc.useResource(self.resource.shadowTex, usage: .read, stages: [.fragment])
-        if DisableTracking == false {
+        if UserTracking {
             enc.waitForFence(self.resource.fence, before: .vertex)
             enc.waitForFence(self.resource.fenceShadowPass, before: .fragment) // The vertex shader does not access the shadow map
         }

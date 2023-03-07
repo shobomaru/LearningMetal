@@ -413,7 +413,7 @@ class Metal: NSObject, MTKViewDelegate {
         csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
         csEnc.setComputePipelineState(self.resource.psoICB!)
         csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
-        csEnc.setBytes([UInt32(frameIndex)], length: MemoryLayout<UInt32>.size * 2, index: 1)
+        csEnc.setBytes([UInt32(frameIndex)], length: MemoryLayout<UInt32>.size, index: 1)
         csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 2)
         csEnc.dispatchThreads(MTLSizeMake(icbSize, 1, 1), threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
         csEnc.endEncoding()
