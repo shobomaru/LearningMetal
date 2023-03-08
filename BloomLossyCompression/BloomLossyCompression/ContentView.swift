@@ -2,12 +2,19 @@ import SwiftUI
 import MetalKit
 import simd
 
-// GPU Time of the 1st blur pass
+// GPU Time of 1st blur pass
 // iPad mini A15 (1024x1024, GPU Performance State: Medium)
 //   Lossless compression: 3.53 ms, Lossy compression: 3.42 ms (RGBA32Float)
 //   Lossless compression: 2.26 ms, Lossy compression: 2.22 ms (RGBA16Float)
 //   Lossless compression: 2.23 ms, Lossy compression: 2.23 ms (BGR10A2Unorm)
 //   Lossless compression: 2.23 ms, Lossy compression: 2.23 ms (RGBA8Unorm)
+// GPU Written to Memory bytes of 1st downsample pass
+// iPad mini A15 (1024x1024)
+//   No Compression: 16.07 MB, Lossless compression: 6.76 MB, Lossy compression: 6.38 MB (RGBA32Float)
+//   No Compression: 8.06 MB,  Lossless compression: 2.64 MB, Lossy compression: 2.56 MB (RGBA16Float)
+//   No Compression: 4.07 MB,  Lossless compression: 1.62 MB, Lossy compression: 1.49 MB (BGR10A2Unorm)
+//   No Compression: 4.07 MB,  Lossless compression: 1.16 MB, Lossy compression: 1.15 MB (RGBA8Unorm)
+let NoCompression = false
 let LossyCompression = true
 let ColorFormat = MTLPixelFormat.rgba16Float
 let BloomTexSize = 1024
@@ -183,6 +190,7 @@ class MyResource {
             let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: ColorFormat, width: BloomTexSize, height: BloomTexSize, mipmapped: false)
             desc.usage = [.shaderRead, .renderTarget]
             desc.storageMode = .private
+            desc.allowGPUOptimizedContents = NoCompression ? false : true
             desc.compressionType = LossyCompression ? .lossy : .lossless
             let downsample00Size = device.heapTextureSizeAndAlign(descriptor: desc)
             var totalSize = align(downsample00Size.size, downsample00Size.align)
@@ -216,6 +224,7 @@ class MyResource {
                 let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: ColorFormat, width: BloomTexSize / (i + 1), height: BloomTexSize / (i + 1), mipmapped: false)
                 desc.usage = [.shaderRead, .renderTarget]
                 desc.storageMode = .private
+                desc.allowGPUOptimizedContents = NoCompression ? false : true
                 desc.compressionType = LossyCompression ? .lossy : .lossless
                 self.downsampleTex.append(self.heap.makeTexture(descriptor: desc, offset: heapPlacementList[2 * i + j])!)
                 self.downsampleTex.last!.label = "DownsampleTex[\(i)][\(j)]"
