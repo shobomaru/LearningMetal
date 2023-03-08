@@ -3,7 +3,7 @@ import MetalKit
 import simd
 
 let UserTracking = true
-let IndirectCommandEncoder = false
+let IndirectCommandEncoder = true
 
 struct ContentView: View {
     @State private var message = "default"
@@ -95,6 +95,17 @@ struct MathUtil {
                                 SIMD4(0, 2.0 / height, 0, 0),
                                 SIMD4(0, 0, 1.0 / (far - near), 0),
                                 SIMD4(0, 0, -near / (far - near), 1)))
+    }
+}
+
+// Copy instance, not reference
+extension Array {
+    @inlinable public init(closure: () -> Element, count: Int) {
+        var ary = [Element]()
+        for _ in 0..<count {
+            ary.append(closure())
+        }
+        self = ary
     }
 }
 
@@ -260,8 +271,8 @@ class MyResource {
         ]
         self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!
         
-        self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
-        self.cbShadow = [MTLBuffer](repeating: device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
+        self.cbScene = [MTLBuffer](closure: { device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])! }, count: 2)
+        self.cbShadow = [MTLBuffer](closure: { device.makeBuffer(length: 4096, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])! }, count: 2)
         
         let dsDesc = MTLDepthStencilDescriptor()
         dsDesc.depthCompareFunction = .greaterEqual
@@ -285,7 +296,7 @@ class MyResource {
         ssDesc.supportArgumentBuffers = true // THIS IS VERY IMPORTANT!!! IF YOU FORGET, WILL GET A GPU FAULT!!!
         self.shadowSS = device.makeSamplerState(descriptor: ssDesc)!
         
-        self.argScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<SceneMetalArgs>.size, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
+        self.argScene = [MTLBuffer](closure: { device.makeBuffer(length: MemoryLayout<SceneMetalArgs>.size, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])! }, count: 2)
         
         let icbSceneDesc = MTLIndirectCommandBufferDescriptor()
         icbSceneDesc.commandTypes = .drawIndexed
@@ -293,7 +304,7 @@ class MyResource {
         icbSceneDesc.inheritPipelineState = true // iOS 13.0+ can disable this option
         icbSceneDesc.maxVertexBufferBindCount = 10
         icbSceneDesc.maxFragmentBufferBindCount = 10
-        self.icbScene = [MTLIndirectCommandBuffer](repeating: device.makeIndirectCommandBuffer(descriptor: icbSceneDesc, maxCommandCount: 10)!, count: 2)
+        self.icbScene = [MTLIndirectCommandBuffer](closure: { device.makeIndirectCommandBuffer(descriptor: icbSceneDesc, maxCommandCount: 10)! }, count: 2)
         
         struct ICBContainer {
             var icb : MTLResourceID
@@ -305,7 +316,7 @@ class MyResource {
             var argScene0: UInt64
             var argScene1: UInt64
         }
-        self.icbArgScene = [MTLBuffer](repeating: device.makeBuffer(length: MemoryLayout<ICBContainer>.size, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])!, count: 2)
+        self.icbArgScene = [MTLBuffer](closure: { device.makeBuffer(length: MemoryLayout<ICBContainer>.size, options: [.cpuCacheModeWriteCombined, hazardTrackingMode])! }, count: 2)
         // Set arguments beforehand
         for i in 0..<self.icbArgScene.count {
             #if false
