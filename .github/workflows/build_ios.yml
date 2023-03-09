@@ -141,3 +141,8 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./TessellationAdaptive
+      - name: Build (WaveParticle)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: .WaveParticle
+
