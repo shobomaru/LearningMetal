@@ -16,7 +16,7 @@ struct CBParticleSim {
     uint maxParticles;
 };
 
-#define BirthCountPerInstance (12)
+constant uint BirthCountPerInstance [[function_constant(0)]];
 #define BirthAmplitude (0.20)
 #define DieAmplitude (BirthAmplitude * 0.02) // 2%
 #define DampingFactor (0.17)

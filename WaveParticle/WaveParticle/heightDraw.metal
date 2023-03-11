@@ -16,7 +16,7 @@ struct CScene {
     float4x4 viewProj;
 };
 
-#define NUM_QUADS (80)
+constant uint NumQuads [[function_constant(0)]];
 
 vertex Output drawVS(constant CDraw &draw [[buffer(0)]],
                      constant CScene &scene [[buffer(1)]],
@@ -25,9 +25,9 @@ vertex Output drawVS(constant CDraw &draw [[buffer(0)]],
 {
     constexpr sampler ss(filter::linear, address::clamp_to_edge);
     
-    ushort xidx = vid % (NUM_QUADS + 1);
-    ushort zidx = vid / (NUM_QUADS + 1);
-    float2 uv = float2(float(xidx) / NUM_QUADS, float(zidx) / NUM_QUADS);
+    ushort xidx = vid % (NumQuads + 1);
+    ushort zidx = vid / (NumQuads + 1);
+    float2 uv = float2(float(xidx) / NumQuads, float(zidx) / NumQuads);
     half height = heightMap.sample(ss, uv, level(0.0)).r;
     
     float3 wpos = mix(draw.minXYZ, draw.maxXYZ, float3(uv.x, 0, uv.y));

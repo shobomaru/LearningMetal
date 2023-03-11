@@ -184,16 +184,35 @@ class MyResource {
     var ibDraw: MTLBuffer
     var normalMap: MTLTexture
     init(device: MTLDevice, alert: (String) -> Void) {
+        var dataBirthCountPerInstance = UInt32(BirthCountPerInstance)
+        var dataNumQuads = UInt32(NumQuads)
+        let constVals = MTLFunctionConstantValues()
+        constVals.setConstantValue(&dataBirthCountPerInstance, type: .uint, withName: "BirthCountPerInstance")
+        constVals.setConstantValue(&dataNumQuads, type: .uint, withName: "NumQuads")
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
-        guard let vsDraw = lib.makeFunction(name: "drawVS") else { fatalError() }
         guard let fsDraw = lib.makeFunction(name: "drawFS") else { fatalError() }
         guard let vsHeight = lib.makeFunction(name: "heightVS") else { fatalError() }
         guard let fsHeight = lib.makeFunction(name: "heightFS") else { fatalError() }
         guard let vsNormal = lib.makeFunction(name: "normalVS") else { fatalError() }
         guard let fsNormal = lib.makeFunction(name: "normalFS") else { fatalError() }
-        guard let csBirth = lib.makeFunction(name: "birthCS") else { fatalError() }
-        guard let csGenIndirectArgs = lib.makeFunction(name: "genIndirectArgsCS") else { fatalError() }
-        guard let csUpdate = lib.makeFunction(name: "updateCS") else { fatalError() }
+        let vsDraw: MTLFunction
+        let csBirth: MTLFunction
+        let csGenIndirectArgs: MTLFunction
+        let csUpdate: MTLFunction
+        let fnDesc = MTLFunctionDescriptor()
+        fnDesc.constantValues = constVals
+        do {
+            fnDesc.name = "drawVS"
+            vsDraw = try lib.makeFunction(descriptor: fnDesc)
+            fnDesc.name = "birthCS"
+            csBirth = try lib.makeFunction(descriptor: fnDesc)
+            fnDesc.name = "genIndirectArgsCS"
+            csGenIndirectArgs = try lib.makeFunction(descriptor: fnDesc)
+            fnDesc.name = "updateCS"
+            csUpdate = try lib.makeFunction(descriptor: fnDesc)
+        } catch _ {
+            fatalError()
+        }
         let psoDesc = MTLRenderPipelineDescriptor()
         psoDesc.vertexFunction = vsDraw
         psoDesc.fragmentFunction = fsDraw
@@ -254,47 +273,6 @@ class MyResource {
             print(e)
             alert(String(describing: e))
         }
-//        // Create a sphere
-//        var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
-//            initializedCount = 0
-//        })
-//        for y in 0...SPHERE_STACKS {
-//            for x in 0...SPHERE_SLICES {
-//                let v0 = Float(x) / Float(SPHERE_SLICES)
-//                let v1 = Float(y) / Float(SPHERE_STACKS)
-//                let theta = 2.0 * Float.pi * v0
-//                let phi = 2.0 * Float.pi * v1 / 2.0
-//                let pos = MTLPackedFloat3Make(sin(phi) * sin(theta), cos(phi), sin(phi) * cos(theta))
-//                let r = Float(1.0)
-//                let norm = MTLPackedFloat3Make(pos.x / r, pos.y / r, pos.z / r)
-//                vbData.append(VertexElement(pos, norm))
-//            }
-//        }
-//        self.vb = device.makeBuffer(bytes: vbData, length: MemoryLayout<VertexElement>.size * vbData.count, options: .cpuCacheModeWriteCombined)!
-//        var ibData = [QuadIndexList](unsafeUninitializedCapacity: (SPHERE_STACKS * SPHERE_SLICES), initializingWith: { buffer, initializedCount in
-//            initializedCount = 0
-//        })
-//        for y in 0..<SPHERE_STACKS {
-//            for x in 0..<SPHERE_SLICES {
-//                let b = UInt16(y * (SPHERE_SLICES + 1) + x)
-//                let s = UInt16(SPHERE_SLICES + 1)
-//                ibData.append(QuadIndexList(b, b + s, b + 1, b + s, b + s + 1, b + 1))
-//            }
-//        }
-//        self.ib = device.makeBuffer(bytes: ibData, length: MemoryLayout<QuadIndexList>.size * ibData.count, options: .cpuCacheModeWriteCombined)!
-//
-//        // Create a plane
-//        let vbPlaneData: [VertexElement] = [
-//            VertexElement(MTLPackedFloat3Make(-1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-//            VertexElement(MTLPackedFloat3Make( 1.0, -1.0,  1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-//            VertexElement(MTLPackedFloat3Make(-1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-//            VertexElement(MTLPackedFloat3Make( 1.0, -1.0, -1.0), MTLPackedFloat3Make(0.0, 1.0, 0.0)),
-//        ]
-//        self.vbPlane = device.makeBuffer(bytes: vbPlaneData, length: MemoryLayout<VertexElement>.size * vbPlaneData.count, options: .cpuCacheModeWriteCombined)!
-//        let ibPlaneData: [QuadIndexList] = [
-//            QuadIndexList(0, 1, 2, 2, 1, 3)
-//        ]
-//        self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
         
         self.cbScene = [MTLBuffer](closure: { device.makeBuffer(length: 64, options: .cpuCacheModeWriteCombined)! }, count: 2)
         
@@ -361,9 +339,6 @@ class MyResource {
         self.psoBirth != nil && self.psoGenIndirectArgs != nil && self.psoUpdate != nil && self.psoHeight != nil && self.psoDraw != nil
     }
 }
-
-let SPHERE_STACKS: Int = 10
-let SPHERE_SLICES: Int = 12
 
 class Metal: NSObject, MTKViewDelegate {
     var parent: ContentView2
