@@ -129,6 +129,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./SimpleTriangle2
+      - name: Build (SSAO)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./SSAO
       - name: Build (Tessellation)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
@@ -144,5 +148,5 @@ jobs:
       - name: Build (WaveParticle)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
-        working-directory: .WaveParticle
+        working-directory: ./WaveParticle
 
