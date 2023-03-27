@@ -14,6 +14,7 @@
 		B0A3DD2829CB2C8100ECF585 /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0A3DD2729CB2C8100ECF585 /* Scene.metal */; };
 		B0A3DD2A29D06ACA00ECF585 /* Lenna.bmp in Resources */ = {isa = PBXBuildFile; fileRef = B0A3DD2929D06ACA00ECF585 /* Lenna.bmp */; };
 		B0A3DD2C29D06AD900ECF585 /* Sailboat.bmp in Resources */ = {isa = PBXBuildFile; fileRef = B0A3DD2B29D06AD900ECF585 /* Sailboat.bmp */; };
+		B0A3DD2E29D1EB4400ECF585 /* Post.metal in Sources */ = {isa = PBXBuildFile; fileRef = B0A3DD2D29D1EB4400ECF585 /* Post.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		B0A3DD2729CB2C8100ECF585 /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
 		B0A3DD2929D06ACA00ECF585 /* Lenna.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = Lenna.bmp; path = ../../res/Lenna.bmp; sourceTree = "<group>"; };
 		B0A3DD2B29D06AD900ECF585 /* Sailboat.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = Sailboat.bmp; path = ../../res/Sailboat.bmp; sourceTree = "<group>"; };
+		B0A3DD2D29D1EB4400ECF585 /* Post.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Post.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				B0A3DD1D29CB2C6400ECF585 /* Assets.xcassets */,
 				B0A3DD1F29CB2C6400ECF585 /* Preview Content */,
 				B0A3DD2729CB2C8100ECF585 /* Scene.metal */,
+				B0A3DD2D29D1EB4400ECF585 /* Post.metal */,
 			);
 			path = PBR;
 			sourceTree = "<group>";
@@ -149,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0A3DD1C29CB2C6300ECF585 /* ContentView.swift in Sources */,
+				B0A3DD2E29D1EB4400ECF585 /* Post.metal in Sources */,
 				B0A3DD1A29CB2C6300ECF585 /* PBRApp.swift in Sources */,
 				B0A3DD2829CB2C8100ECF585 /* Scene.metal in Sources */,
 			);

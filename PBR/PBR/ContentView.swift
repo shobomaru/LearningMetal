@@ -131,6 +131,7 @@ class Metal: NSObject, MTKViewDelegate {
     var device: MTLDevice
     var cmdQueue: MTLCommandQueue
     var pso: MTLRenderPipelineState?
+    var psoPost: MTLRenderPipelineState?
     var vb: MTLBuffer
     var ib: MTLBuffer
     var vbPlane: MTLBuffer
@@ -140,9 +141,11 @@ class Metal: NSObject, MTKViewDelegate {
     var instanceMatBuf: MTLBuffer
     var depthTex: MTLTexture?
     var depthState: MTLDepthStencilState
+    var depthStateIgnore: MTLDepthStencilState
     var sailboatTex: MTLTexture
     var lennaTex: MTLTexture
     var ss: MTLSamplerState
+    var lightAccumTex: MTLTexture?
     init(_ parent: ContentView2) {
         self.parent = parent
         self.device = MTLCreateSystemDefaultDevice()!
@@ -155,7 +158,9 @@ class Metal: NSObject, MTKViewDelegate {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let vs = lib.makeFunction(name: "sceneVS") else { fatalError() }
         guard let fs = lib.makeFunction(name: "sceneFS") else { fatalError() }
-        let psoDesc = MTLRenderPipelineDescriptor()
+        guard let vsPost = lib.makeFunction(name: "postVS") else { fatalError() }
+        guard let fsPost = lib.makeFunction(name: "postFS") else { fatalError() }
+        var psoDesc = MTLRenderPipelineDescriptor()
         psoDesc.vertexFunction = vs
         psoDesc.fragmentFunction = fs
         let vd = MTLVertexDescriptor()
@@ -171,10 +176,24 @@ class Metal: NSObject, MTKViewDelegate {
         vd.layouts[0].stride = MemoryLayout<VertexElement>.stride
         psoDesc.vertexDescriptor = vd
         psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm
+        psoDesc.colorAttachments[1].pixelFormat = .rgba16Float
         psoDesc.depthAttachmentPixelFormat = .depth32Float
         psoDesc.label = "Scene PSO"
         do {
             self.pso = try device.makeRenderPipelineState(descriptor: psoDesc)
+        } catch let e {
+            print(e)
+            parent.enqueueAlert(String(describing: e))
+        }
+        psoDesc = MTLRenderPipelineDescriptor()
+        psoDesc.vertexFunction = vsPost
+        psoDesc.fragmentFunction = fsPost
+        psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm
+        psoDesc.colorAttachments[1].pixelFormat = .rgba16Float
+        psoDesc.depthAttachmentPixelFormat = .depth32Float
+        psoDesc.label = "Post PSO"
+        do {
+            self.psoPost = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
             parent.enqueueAlert(String(describing: e))
@@ -242,6 +261,10 @@ class Metal: NSObject, MTKViewDelegate {
         dsDesc.isDepthWriteEnabled = true
         self.depthState = device.makeDepthStencilState(descriptor: dsDesc)!
         
+        dsDesc.depthCompareFunction = .always
+        dsDesc.isDepthWriteEnabled = false
+        self.depthStateIgnore = device.makeDepthStencilState(descriptor: dsDesc)!
+        
         guard let sailboatPath = Bundle.main.url(forResource: "Sailboat", withExtension: "bmp") else { fatalError() }
         guard let sailboatFile = try? FileHandle(forReadingFrom: sailboatPath) else { fatalError() }
         let sailboatData = Metal.generateMipmap(Metal.loadBitmap(sailboatFile))
@@ -287,7 +310,11 @@ class Metal: NSObject, MTKViewDelegate {
         texDesc.storageMode = .private //.memoryless
         texDesc.pixelFormat = .depth32Float
         texDesc.usage = [.renderTarget]
-        self.depthTex = self.device.makeTexture(descriptor: texDesc)
+        self.depthTex = self.device.makeTexture(descriptor: texDesc)!
+        
+        texDesc.storageMode = .memoryless
+        texDesc.pixelFormat = .rgba16Float
+        self.lightAccumTex = self.device.makeTexture(descriptor: texDesc)!
     }
     func draw(in view: MTKView) {
         if (self.pso == nil) { return }
@@ -328,6 +355,10 @@ class Metal: NSObject, MTKViewDelegate {
         passDesc.colorAttachments[0].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 1.0)
         passDesc.colorAttachments[0].loadAction = .clear
         passDesc.colorAttachments[0].storeAction = .store
+        passDesc.colorAttachments[1].texture = self.lightAccumTex
+        passDesc.colorAttachments[1].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 0.0/*not rendered flag*/)
+        passDesc.colorAttachments[1].loadAction = .clear
+        passDesc.colorAttachments[1].storeAction = .dontCare
         passDesc.depthAttachment.clearDepth = 0.0
         passDesc.depthAttachment.loadAction = .clear
         passDesc.depthAttachment.storeAction = .dontCare
@@ -343,10 +374,15 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setFragmentBuffer(self.cbLight[frameIndex], offset: 0, index: 0)
         enc.setFragmentTexture(self.sailboatTex, index: 0)
         enc.setFragmentSamplerState(self.ss, index: 0)
+        // Scene
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.ib, indexBufferOffset: 0, instanceCount: 18)
         enc.setVertexBuffer(self.vbPlane, offset: 0, index: 0)
         enc.setFragmentTexture(self.lennaTex, index: 0)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 18)
+        // Post
+        enc.setDepthStencilState(self.depthStateIgnore)
+        enc.setRenderPipelineState(self.psoPost!)
+        enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         enc.endEncoding()
         cmdBuf.present(currentDrawable)
         cmdBuf.addCompletedHandler {[weak self] _ in

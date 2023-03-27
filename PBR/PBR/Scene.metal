@@ -31,6 +31,10 @@ struct Output {
     half2 clearCoat;
 };
 
+struct ColorAttachments {
+    half4 lightAccum [[color(1)]];
+};
+
 half3x3 GetNormalMatrix(float4x4 m)
 {
     return half3x3(half3(m[0].xyz), half3(m[1].xyz), half3(m[2].xyz));
@@ -95,10 +99,10 @@ half V_Kelemen(half LoH)
 {
     return 0.25h / (LoH * LoH);
 }
-fragment half4 sceneFS(Output input [[stage_in]],
-                       constant CLight& constants [[buffer(0)]],
-                       texture2d<half> tex [[texture(0)]],
-                       sampler ss [[sampler(0)]])
+fragment ColorAttachments sceneFS(Output input [[stage_in]],
+                          constant CLight& constants [[buffer(0)]],
+                          texture2d<half> tex [[texture(0)]],
+                          sampler ss [[sampler(0)]])
 {
     half4 baseColor = tex.sample(ss, input.texcoord);
     half3 diffColor = (input.metallic > 0.0) ? 0.0 : baseColor.rgb;
@@ -135,5 +139,7 @@ fragment half4 sceneFS(Output input [[stage_in]],
     //half3 F = Fr + Fd * diffColor; // Diffuse + Specular
     half3 F = (Fr + Fd * diffColor) * (1 - termFc) + Frc;
     float3 lit = constants.sunLightIntensity * (float3)F * (float3)dotNL;
-    return half4((half3)lit, 1.0);
+    
+    ColorAttachments output = { half4((half3)lit, 1.0) };
+    return output;
 }
