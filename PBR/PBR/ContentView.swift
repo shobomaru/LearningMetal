@@ -88,6 +88,17 @@ struct MathUtil {
     }
 }
 
+// Copy instance, not reference
+extension Array {
+    @inlinable public init(closure: () -> Element, count: Int) {
+        var ary = [Element]()
+        for _ in 0..<count {
+            ary.append(closure())
+        }
+        self = ary
+    }
+}
+
 struct VertexElement {
     var position: MTLPackedFloat3
     var normal: MTLPackedFloat3
@@ -121,15 +132,31 @@ struct ImageData {
     var data: [UInt8]
 };
 
+class MyScene {
+    var cameraPos: simd_float3
+    var cameraTarget: simd_float3
+    var cameraUp: simd_float3
+    var cameraFov: Float
+    var cameraNear: Float
+    var cameraFar: Float
+    var sunLightIntensity: simd_float3
+    var sunLightDirection: simd_float3
+    init() {
+        cameraPos = simd_float3(0, 2.5, -5.5)
+        cameraTarget = simd_float3(0, 1.5, 0)
+        cameraUp = simd_float3(0, 1, 0)
+        cameraFov = 48.0 * Float.pi / 180.0
+        cameraNear = 0.01
+        cameraFar = 100.0
+        sunLightIntensity = simd_float3(3, 3, 3)
+        sunLightDirection = normalize(simd_float3(-0.1, 0.1, -1.0))
+    }
+}
+
 let SPHERE_STACKS: Int = 10
 let SPHERE_SLICES: Int = 12
 
-class Metal: NSObject, MTKViewDelegate {
-    var parent: ContentView2
-    var frameCount: UInt64 = 0
-    var sema = DispatchSemaphore(value: 2) // double buffer
-    var device: MTLDevice
-    var cmdQueue: MTLCommandQueue
+class MyResource {
     var pso: MTLRenderPipelineState?
     var psoPost: MTLRenderPipelineState?
     var vb: MTLBuffer
@@ -139,22 +166,12 @@ class Metal: NSObject, MTKViewDelegate {
     var cbScene: [MTLBuffer]
     var cbLight: [MTLBuffer]
     var instanceMatBuf: MTLBuffer
-    var depthTex: MTLTexture?
     var depthState: MTLDepthStencilState
     var depthStateIgnore: MTLDepthStencilState
     var sailboatTex: MTLTexture
     var lennaTex: MTLTexture
     var ss: MTLSamplerState
-    var lightAccumTex: MTLTexture?
-    init(_ parent: ContentView2) {
-        self.parent = parent
-        self.device = MTLCreateSystemDefaultDevice()!
-        #if !targetEnvironment(simulator)
-        if !device.supportsFamily(.metal3) {
-            parent.enqueueAlert("Metal3 GPU family needed")
-        }
-        #endif
-        self.cmdQueue = self.device.makeCommandQueue()!
+    init(device: MTLDevice, alert: (String) -> Void) {
         guard let lib = device.makeDefaultLibrary() else { fatalError() }
         guard let vs = lib.makeFunction(name: "sceneVS") else { fatalError() }
         guard let fs = lib.makeFunction(name: "sceneFS") else { fatalError() }
@@ -183,7 +200,7 @@ class Metal: NSObject, MTKViewDelegate {
             self.pso = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
-            parent.enqueueAlert(String(describing: e))
+            alert(String(describing: e))
         }
         psoDesc = MTLRenderPipelineDescriptor()
         psoDesc.vertexFunction = vsPost
@@ -196,7 +213,7 @@ class Metal: NSObject, MTKViewDelegate {
             self.psoPost = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
-            parent.enqueueAlert(String(describing: e))
+            alert(String(describing: e))
         }
         // Create a sphere
         var vbData = [VertexElement](unsafeUninitializedCapacity: (SPHERE_STACKS + 1) * (SPHERE_SLICES + 1), initializingWith: { buffer, initializedCount in
@@ -241,8 +258,8 @@ class Metal: NSObject, MTKViewDelegate {
         ]
         self.ibPlane = device.makeBuffer(bytes: ibPlaneData, length: MemoryLayout<QuadIndexList>.size * ibPlaneData.count, options: .cpuCacheModeWriteCombined)!
         
-        self.cbScene = [MTLBuffer](repeating: device.makeBuffer(length: 1024, options: .cpuCacheModeWriteCombined)!, count: 2)
-        self.cbLight = [MTLBuffer](repeating: device.makeBuffer(length: 1024, options: .cpuCacheModeWriteCombined)!, count: 2)
+        self.cbScene = [MTLBuffer](closure: { device.makeBuffer(length: 1024, options: .cpuCacheModeWriteCombined)! }, count: 2)
+        self.cbLight = [MTLBuffer](closure: { device.makeBuffer(length: 1024, options: .cpuCacheModeWriteCombined)! }, count: 2)
         
         var instanceMat = [float3x4](repeating: float3x4(), count: 19)
         for i in 0..<18 {
@@ -267,7 +284,7 @@ class Metal: NSObject, MTKViewDelegate {
         
         guard let sailboatPath = Bundle.main.url(forResource: "Sailboat", withExtension: "bmp") else { fatalError() }
         guard let sailboatFile = try? FileHandle(forReadingFrom: sailboatPath) else { fatalError() }
-        let sailboatData = Metal.generateMipmap(Metal.loadBitmap(sailboatFile))
+        let sailboatData = MyResource.generateMipmap(MyResource.loadBitmap(sailboatFile))
         let sailboatTexDesc = MTLTextureDescriptor()
         sailboatTexDesc.width = Int(sailboatData[0].extent[0])
         sailboatTexDesc.height = Int(sailboatData[0].extent[1])
@@ -281,7 +298,7 @@ class Metal: NSObject, MTKViewDelegate {
         
         guard let lennaPath = Bundle.main.url(forResource: "Lenna", withExtension: "bmp") else { fatalError() }
         guard let lennaFile = try? FileHandle(forReadingFrom: lennaPath) else { fatalError() }
-        let lennaData = Metal.generateMipmap(Metal.loadBitmap(lennaFile))
+        let lennaData = MyResource.generateMipmap(MyResource.loadBitmap(lennaFile))
         let lennaTexDesc = MTLTextureDescriptor()
         lennaTexDesc.width = Int(sailboatData[0].extent[0])
         lennaTexDesc.height = Int(sailboatData[0].extent[1])
@@ -302,93 +319,8 @@ class Metal: NSObject, MTKViewDelegate {
         ssDesc.maxAnisotropy = 4
         self.ss = device.makeSamplerState(descriptor: ssDesc)!
     }
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        let texDesc = MTLTextureDescriptor()
-        texDesc.width = Int(size.width)
-        texDesc.height = Int(size.height)
-        texDesc.textureType = .type2D
-        texDesc.storageMode = .private //.memoryless
-        texDesc.pixelFormat = .depth32Float
-        texDesc.usage = [.renderTarget]
-        self.depthTex = self.device.makeTexture(descriptor: texDesc)!
-        
-        texDesc.storageMode = .memoryless
-        texDesc.pixelFormat = .rgba16Float
-        self.lightAccumTex = self.device.makeTexture(descriptor: texDesc)!
-    }
-    func draw(in view: MTKView) {
-        if (self.pso == nil) { return }
-        guard let currentDrawable = view.currentDrawable else { return }
-        sema.wait()
-        self.frameCount += 1
-        let frameIndex = Int(self.frameCount % 2)
-        
-        let cameraPos = simd_float3(0, 2.5, -5.5)
-        let cameraTarget = simd_float3(0, 1.5, 0)
-        let cameraUp = simd_float3(0, 1, 0)
-        let cameraFov = 45.0 * Float.pi / 180.0
-        let cameraNear: Float = 0.01
-        let cameraFar: Float = 100.0
-        
-        let viewMat = MathUtil.lookAt(pos: cameraPos, target: cameraTarget, up: cameraUp)
-        let projMat = MathUtil.perspective(fov: cameraFov, aspect: Float(view.drawableSize.width / view.drawableSize.height), near: cameraFar, far: cameraNear)
-        
-        struct CBScene {
-            let viewProj: float4x4
-            let metallic: packed_float2
-            let roughness: packed_float2
-        };
-        let viewProj = viewMat.transpose * projMat.transpose
-        var sceneData = CBScene(viewProj: viewProj, metallic: packed_float2(0, 1), roughness: packed_float2(0.05, 0.95))
-        self.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
-        
-        struct CBLight {
-            let cameraPosition: simd_float3
-            let sunLightIntensity: simd_float3
-            let sunLightDirection: simd_float3
-        }
-        var lightData = CBLight(cameraPosition: cameraPos, sunLightIntensity: simd_float3(3, 3, 3), sunLightDirection: normalize(simd_float3(-0.1, 0.1, -1.0)))
-        self.cbLight[frameIndex].contents().copyMemory(from: &lightData, byteCount: MemoryLayout<CBLight>.size)
-        
-        let cmdBuf = self.cmdQueue.makeCommandBuffer()!
-        let passDesc = view.currentRenderPassDescriptor!
-        passDesc.colorAttachments[0].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 1.0)
-        passDesc.colorAttachments[0].loadAction = .clear
-        passDesc.colorAttachments[0].storeAction = .store
-        passDesc.colorAttachments[1].texture = self.lightAccumTex
-        passDesc.colorAttachments[1].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 0.0/*not rendered flag*/)
-        passDesc.colorAttachments[1].loadAction = .clear
-        passDesc.colorAttachments[1].storeAction = .dontCare
-        passDesc.depthAttachment.clearDepth = 0.0
-        passDesc.depthAttachment.loadAction = .clear
-        passDesc.depthAttachment.storeAction = .dontCare
-        passDesc.depthAttachment.texture = self.depthTex
-        let enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
-        enc.label = "Scene Pass"
-        enc.setRenderPipelineState(self.pso!)
-        enc.setCullMode(.back)
-        enc.setDepthStencilState(self.depthState)
-        enc.setVertexBuffer(self.vb, offset: 0, index: 0)
-        enc.setVertexBuffer(self.instanceMatBuf, offset: 0, index: 1)
-        enc.setVertexBuffer(self.cbScene[frameIndex], offset: 0, index: 2)
-        enc.setFragmentBuffer(self.cbLight[frameIndex], offset: 0, index: 0)
-        enc.setFragmentTexture(self.sailboatTex, index: 0)
-        enc.setFragmentSamplerState(self.ss, index: 0)
-        // Scene
-        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.ib, indexBufferOffset: 0, instanceCount: 18)
-        enc.setVertexBuffer(self.vbPlane, offset: 0, index: 0)
-        enc.setFragmentTexture(self.lennaTex, index: 0)
-        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 18)
-        // Post
-        enc.setDepthStencilState(self.depthStateIgnore)
-        enc.setRenderPipelineState(self.psoPost!)
-        enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
-        enc.endEncoding()
-        cmdBuf.present(currentDrawable)
-        cmdBuf.addCompletedHandler {[weak self] _ in
-            self?.sema.signal()
-        }
-        cmdBuf.commit()
+    func available() -> Bool {
+        self.pso != nil && self.psoPost != nil
     }
     static private func loadBitmap(_ fh: FileHandle) -> ImageData {
         struct BitmapInfoHeader {
@@ -454,5 +386,112 @@ class Metal: NSObject, MTKViewDelegate {
             }
         }
         return ImageData(extent: ext, data: data)
+    }
+}
+
+class Metal: NSObject, MTKViewDelegate {
+    var parent: ContentView2
+    var frameCount: UInt64 = 0
+    var sema = DispatchSemaphore(value: 2) // double buffer
+    var device: MTLDevice
+    var cmdQueue: MTLCommandQueue
+    var depthTex: MTLTexture?
+    var lightAccumTex: MTLTexture?
+    var scene: MyScene
+    let resource: MyResource
+    init(_ parent: ContentView2) {
+        self.parent = parent
+        self.device = MTLCreateSystemDefaultDevice()!
+        #if !targetEnvironment(simulator)
+        if !device.supportsFamily(.metal3) {
+            parent.enqueueAlert("Metal3 GPU family needed")
+        }
+        #endif
+        self.cmdQueue = self.device.makeCommandQueue()!
+        self.scene = MyScene()
+        self.resource = MyResource(device: device, alert: { (s: String) -> Void  in
+            parent.enqueueAlert(s)
+        })
+    }
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        let texDesc = MTLTextureDescriptor()
+        texDesc.width = Int(size.width)
+        texDesc.height = Int(size.height)
+        texDesc.textureType = .type2D
+        texDesc.storageMode = .private //.memoryless
+        texDesc.pixelFormat = .depth32Float
+        texDesc.usage = [.renderTarget]
+        self.depthTex = self.device.makeTexture(descriptor: texDesc)!
+        
+        texDesc.storageMode = .memoryless
+        texDesc.pixelFormat = .rgba16Float
+        self.lightAccumTex = self.device.makeTexture(descriptor: texDesc)!
+    }
+    func draw(in view: MTKView) {
+        if !self.resource.available() { return }
+        guard let currentDrawable = view.currentDrawable else { return }
+        sema.wait()
+        self.frameCount += 1
+        let frameIndex = Int(self.frameCount % 2)
+        
+        let viewMat = MathUtil.lookAt(pos: self.scene.cameraPos, target: self.scene.cameraTarget, up: self.scene.cameraUp)
+        let projMat = MathUtil.perspective(fov: self.scene.cameraFov, aspect: Float(view.drawableSize.width / view.drawableSize.height), near: self.scene.cameraFar, far: self.scene.cameraNear)
+        
+        struct CBScene {
+            let viewProj: float4x4
+            let metallic: packed_float2
+            let roughness: packed_float2
+        };
+        let viewProj = viewMat.transpose * projMat.transpose
+        var sceneData = CBScene(viewProj: viewProj, metallic: packed_float2(0, 1), roughness: packed_float2(0.05, 0.95))
+        self.resource.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
+        
+        struct CBLight {
+            let cameraPosition: simd_float3
+            let sunLightIntensity: simd_float3
+            let sunLightDirection: simd_float3
+        }
+        var lightData = CBLight(cameraPosition: self.scene.cameraPos, sunLightIntensity: self.scene.sunLightIntensity, sunLightDirection: self.scene.sunLightDirection)
+        self.resource.cbLight[frameIndex].contents().copyMemory(from: &lightData, byteCount: MemoryLayout<CBLight>.size)
+        
+        let cmdBuf = self.cmdQueue.makeCommandBuffer()!
+        let passDesc = view.currentRenderPassDescriptor!
+        passDesc.colorAttachments[0].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 1.0)
+        passDesc.colorAttachments[0].loadAction = .clear
+        passDesc.colorAttachments[0].storeAction = .store
+        passDesc.colorAttachments[1].texture = self.lightAccumTex
+        passDesc.colorAttachments[1].clearColor = MTLClearColorMake(0.1, 0.2, 0.4, 0.0/*not rendered flag*/)
+        passDesc.colorAttachments[1].loadAction = .clear
+        passDesc.colorAttachments[1].storeAction = .dontCare
+        passDesc.depthAttachment.clearDepth = 0.0
+        passDesc.depthAttachment.loadAction = .clear
+        passDesc.depthAttachment.storeAction = .dontCare
+        passDesc.depthAttachment.texture = self.depthTex
+        let enc = cmdBuf.makeRenderCommandEncoder(descriptor: passDesc)!
+        enc.label = "Scene Pass"
+        enc.setRenderPipelineState(self.resource.pso!)
+        enc.setCullMode(.back)
+        enc.setDepthStencilState(self.resource.depthState)
+        enc.setVertexBuffer(self.resource.vb, offset: 0, index: 0)
+        enc.setVertexBuffer(self.resource.instanceMatBuf, offset: 0, index: 1)
+        enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 2)
+        enc.setFragmentBuffer(self.resource.cbLight[frameIndex], offset: 0, index: 0)
+        enc.setFragmentTexture(self.resource.sailboatTex, index: 0)
+        enc.setFragmentSamplerState(self.resource.ss, index: 0)
+        // Scene
+        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 18)
+        enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
+        enc.setFragmentTexture(self.resource.lennaTex, index: 0)
+        enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 18)
+        // Post
+        enc.setDepthStencilState(self.resource.depthStateIgnore)
+        enc.setRenderPipelineState(self.resource.psoPost!)
+        enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+        enc.endEncoding()
+        cmdBuf.present(currentDrawable)
+        cmdBuf.addCompletedHandler {[weak self] _ in
+            self?.sema.signal()
+        }
+        cmdBuf.commit()
     }
 }
