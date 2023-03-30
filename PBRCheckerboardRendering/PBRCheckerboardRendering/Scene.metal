@@ -99,12 +99,47 @@ half V_Kelemen(half LoH)
 {
     return 0.25h / (LoH * LoH);
 }
-fragment ColorAttachments sceneFS(Output input [[stage_in]],
-                          constant CLight& constants [[buffer(0)]],
-                          texture2d<half> tex [[texture(0)]],
-                          sampler ss [[sampler(0)]])
+
+template<typename T>
+void fixCheckerboardVarying(thread T& v, bool isOdd, uint sampleID)
 {
-    half4 baseColor = tex.sample(ss, input.texcoord);
+    T tc = v;
+    T dx = dfdx(tc);
+    T dy = dfdy(tc);
+    if (isOdd) {
+        if (sampleID == 0) {
+            tc += dx / 4;
+            tc -= dy / 4;
+        } else {
+            tc -= dx / 4;
+            tc += dy / 4;
+        }
+    } else {
+        if (sampleID == 0) {
+            tc -= dx / 4;
+            tc -= dy / 4;
+        } else {
+            tc += dx / 4;
+            tc += dy / 4;
+        }
+    }
+    v = tc;
+}
+
+fragment ColorAttachments sceneFS(Output input [[stage_in]],
+                                  constant CLight& constants [[buffer(0)]],
+                                  texture2d<half> tex [[texture(0)]],
+                                  sampler ss [[sampler(0)]],
+                                  constant uint& isOdd [[buffer(1)]],
+                                  uint sampleID [[sample_id]])
+{
+    // Metal's sample location does not affect varying parameters :(
+    fixCheckerboardVarying(input.texcoord, isOdd, sampleID);
+    fixCheckerboardVarying(input.normal, isOdd, sampleID);
+    fixCheckerboardVarying(input.world, isOdd, sampleID);
+        
+    // We needs to modify ddx/ddy in order to match derivatives in full resolution
+    half4 baseColor = tex.sample(ss, input.texcoord, gradient2d(dfdx(input.texcoord) / 2, dfdy(input.texcoord) / 2));
     half3 diffColor = (input.metallic > 0.0) ? 0.0 : baseColor.rgb;
     half3 specColor = (input.metallic > 0.0) ? baseColor.rgb : half3(F0);
     half3 normal = normalize(input.normal);
@@ -140,6 +175,7 @@ fragment ColorAttachments sceneFS(Output input [[stage_in]],
     half3 F = (Fr + Fd * diffColor) * (1 - termFc) + Frc;
     float3 lit = constants.sunLightIntensity * (float3)F * (float3)dotNL;
     
+    //lit=float3((float2)input.texcoord.xy * 10, 0);
     ColorAttachments output = { half4((half3)lit, 1.0) };
     return output;
 }

@@ -40,7 +40,8 @@ half3 linearToSrgb(half3 lin) {
 }
 
 fragment half4 postFS(Output input [[stage_in]],
-                     ColorAttachments colors)
+                      ColorAttachments colors,
+                      uint sampleID [[sample_id]])
 {
     if (colors.lightAccum.a == 0.0)
     {
