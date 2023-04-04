@@ -65,6 +65,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./PBR
+      - name: Build (PBR_IBL)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./PBR_IBL
       - name: Build (PBRCheckerboardRendering)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
