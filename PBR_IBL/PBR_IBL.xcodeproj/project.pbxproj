@@ -23,6 +23,7 @@
 		B03D189629D86EB900E933A0 /* negx.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D189029D86EB900E933A0 /* negx.bin */; };
 		B03D189729D86EB900E933A0 /* posy.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D189129D86EB900E933A0 /* posy.bin */; };
 		B03D189829D86EB900E933A0 /* negy.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D189229D86EB900E933A0 /* negy.bin */; };
+		B03D189A29E0794E00E933A0 /* Background.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03D189929E0794E00E933A0 /* Background.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		B03D189029D86EB900E933A0 /* negx.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = negx.bin; path = ../../res/negx.bin; sourceTree = "<group>"; };
 		B03D189129D86EB900E933A0 /* posy.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = posy.bin; path = ../../res/posy.bin; sourceTree = "<group>"; };
 		B03D189229D86EB900E933A0 /* negy.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = negy.bin; path = ../../res/negy.bin; sourceTree = "<group>"; };
+		B03D189929E0794E00E933A0 /* Background.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Background.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +93,7 @@
 				B03D188329D8525100E933A0 /* Post.metal */,
 				B03D188929D8548100E933A0 /* GI.metal */,
 				B03D188B29D860BF00E933A0 /* SH.metal */,
+				B03D189929E0794E00E933A0 /* Background.metal */,
 			);
 			path = PBR_IBL;
 			sourceTree = "<group>";
@@ -186,6 +189,7 @@
 				B03D188429D8525100E933A0 /* Post.metal in Sources */,
 				B03D188A29D8548100E933A0 /* GI.metal in Sources */,
 				B03D187229D851F200E933A0 /* PBR_IBLApp.swift in Sources */,
+				B03D189A29E0794E00E933A0 /* Background.metal in Sources */,
 				B03D188229D8524900E933A0 /* Scene.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

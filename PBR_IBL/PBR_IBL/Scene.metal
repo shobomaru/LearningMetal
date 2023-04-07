@@ -5,6 +5,7 @@ using namespace metal;
 
 struct CScene {
     float4x4 ViewProj;
+    float4x4 InvViewProj;
     packed_float2 Metallic;
     packed_float2 Roughness;
 };

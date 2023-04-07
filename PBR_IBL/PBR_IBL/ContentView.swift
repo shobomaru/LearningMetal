@@ -164,6 +164,7 @@ let SPHERE_SLICES: Int = 12
 class MyResource {
     var pso: MTLRenderPipelineState?
     var psoPost: MTLRenderPipelineState?
+    var psoBackground: MTLRenderPipelineState?
     var psoAmbientBrdf: MTLRenderPipelineState?
     var psoPrefilterEnvMap: MTLRenderPipelineState?
     var psoIrradianceEnvMap: MTLRenderPipelineState?
@@ -177,6 +178,7 @@ class MyResource {
     var cbLight: [MTLBuffer]
     var instanceMatBuf: MTLBuffer
     var depthState: MTLDepthStencilState
+    var depthStateBG: MTLDepthStencilState
     var depthStateIgnore: MTLDepthStencilState
     var sailboatTex: MTLTexture
     var lennaTex: MTLTexture
@@ -192,6 +194,7 @@ class MyResource {
         guard let fs = lib.makeFunction(name: "sceneFS") else { fatalError() }
         guard let vsPost = lib.makeFunction(name: "postVS") else { fatalError() }
         guard let fsPost = lib.makeFunction(name: "postFS") else { fatalError() }
+        guard let fsBackground = lib.makeFunction(name: "backgroundFS") else { fatalError() }
         guard let fsAmbientBrdf = lib.makeFunction(name: "ambientBrdfFS") else { fatalError() }
         guard let fsEnvMapFilter = lib.makeFunction(name: "envMapFilterFS") else { fatalError() }
         guard let fsIrradianceMap = lib.makeFunction(name: "irradianeMapFS") else { fatalError() }
@@ -232,6 +235,20 @@ class MyResource {
         psoDesc.label = "Post PSO"
         do {
             self.psoPost = try device.makeRenderPipelineState(descriptor: psoDesc)
+        } catch let e {
+            print(e)
+            alert(String(describing: e))
+        }
+        psoDesc = MTLRenderPipelineDescriptor()
+        psoDesc.inputPrimitiveTopology = .triangle
+        psoDesc.vertexFunction = vsPost
+        psoDesc.fragmentFunction = fsBackground
+        psoDesc.colorAttachments[0].pixelFormat = .rgba8Unorm
+        psoDesc.colorAttachments[1].pixelFormat = .rgba16Float
+        psoDesc.depthAttachmentPixelFormat = .depth32Float
+        psoDesc.label = "Background PSO"
+        do {
+            self.psoBackground = try device.makeRenderPipelineState(descriptor: psoDesc)
         } catch let e {
             print(e)
             alert(String(describing: e))
@@ -356,6 +373,10 @@ class MyResource {
         dsDesc.isDepthWriteEnabled = true
         self.depthState = device.makeDepthStencilState(descriptor: dsDesc)!
         
+        dsDesc.depthCompareFunction = .equal
+        dsDesc.isDepthWriteEnabled = false
+        self.depthStateBG = device.makeDepthStencilState(descriptor: dsDesc)!
+        
         dsDesc.depthCompareFunction = .always
         dsDesc.isDepthWriteEnabled = false
         self.depthStateIgnore = device.makeDepthStencilState(descriptor: dsDesc)!
@@ -444,7 +465,7 @@ class MyResource {
         self.bufSH = device.makeBuffer(length: 4 * (9 * 3 + 1), options: [.storageModePrivate])! // SH L2 RGB + weight
     }
     func available() -> Bool {
-        self.pso != nil && self.psoPost != nil && self.psoAmbientBrdf != nil && self.psoPrefilterEnvMap != nil && self.psoIrradianceEnvMap != nil && self.psoProjSH != nil && self.psoConvSH != nil
+        self.pso != nil && self.psoPost != nil && self.psoBackground != nil && self.psoAmbientBrdf != nil && self.psoPrefilterEnvMap != nil && self.psoIrradianceEnvMap != nil && self.psoProjSH != nil && self.psoConvSH != nil
     }
     static private func loadBitmap(_ fh: FileHandle) -> ImageData {
         struct BitmapInfoHeader {
@@ -563,11 +584,12 @@ class Metal: NSObject, MTKViewDelegate {
         
         struct CBScene {
             let viewProj: float4x4
+            let invViewProj: float4x4
             let metallic: packed_float2
             let roughness: packed_float2
         };
         let viewProj = viewMat.transpose * projMat.transpose
-        var sceneData = CBScene(viewProj: viewProj, metallic: packed_float2(0, 1), roughness: packed_float2(0.05, 0.95))
+        var sceneData = CBScene(viewProj: viewProj, invViewProj: viewProj.inverse, metallic: packed_float2(0, 1), roughness: packed_float2(0.05, 0.95))
         self.resource.cbScene[frameIndex].contents().copyMemory(from: &sceneData, byteCount: MemoryLayout<CBScene>.size)
         
         struct CBLight {
@@ -672,16 +694,22 @@ class Metal: NSObject, MTKViewDelegate {
         enc.setVertexBuffer(self.resource.instanceMatBuf, offset: 0, index: 1)
         enc.setVertexBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 2)
         enc.setFragmentBuffer(self.resource.cbLight[frameIndex], offset: 0, index: 0)
+        enc.setFragmentBuffer(self.resource.bufSH, offset: 0, index: 1)
+        enc.setFragmentBuffer(self.resource.cbScene[frameIndex], offset: 0, index: 2)
         enc.setFragmentTexture(self.resource.sailboatTex, index: 0)
         enc.setFragmentTexture(self.resource.ambientBrdfTex, index: 3)
         enc.setFragmentTexture(self.resource.prefilteredEnvTex, index: 4)
-        enc.setFragmentBuffer(self.resource.bufSH, offset: 0, index: 1)
         enc.setFragmentSamplerState(self.resource.ss, index: 0)
         // Scene
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6 * SPHERE_SLICES * SPHERE_STACKS, indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 18)
         enc.setVertexBuffer(self.resource.vbPlane, offset: 0, index: 0)
         enc.setFragmentTexture(self.resource.lennaTex, index: 0)
         enc.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 18)
+        // Background
+        enc.setFragmentTexture(self.resource.radianceEnvTex, index: 0)
+        enc.setDepthStencilState(self.resource.depthStateBG)
+        enc.setRenderPipelineState(self.resource.psoBackground!)
+        enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         // Post
         enc.setDepthStencilState(self.resource.depthStateIgnore)
         enc.setRenderPipelineState(self.resource.psoPost!)
