@@ -1,0 +1,400 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B03D18A829E1984700E933A0 /* PBR_IBL_EDRMonitorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03D18A729E1984700E933A0 /* PBR_IBL_EDRMonitorApp.swift */; };
+		B03D18AA29E1984700E933A0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03D18A929E1984700E933A0 /* ContentView.swift */; };
+		B03D18AC29E1984900E933A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B03D18AB29E1984900E933A0 /* Assets.xcassets */; };
+		B03D18AF29E1984900E933A0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B03D18AE29E1984900E933A0 /* Preview Assets.xcassets */; };
+		B03D18BD29E198C600E933A0 /* negy.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D18B529E198C600E933A0 /* negy.bin */; };
+		B03D18BE29E198C600E933A0 /* Lenna.bmp in Resources */ = {isa = PBXBuildFile; fileRef = B03D18B629E198C600E933A0 /* Lenna.bmp */; };
+		B03D18BF29E198C600E933A0 /* posx.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D18B729E198C600E933A0 /* posx.bin */; };
+		B03D18C029E198C600E933A0 /* Sailboat.bmp in Resources */ = {isa = PBXBuildFile; fileRef = B03D18B829E198C600E933A0 /* Sailboat.bmp */; };
+		B03D18C129E198C600E933A0 /* posz.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D18B929E198C600E933A0 /* posz.bin */; };
+		B03D18C229E198C600E933A0 /* negz.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D18BA29E198C600E933A0 /* negz.bin */; };
+		B03D18C329E198C600E933A0 /* negx.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D18BB29E198C600E933A0 /* negx.bin */; };
+		B03D18C429E198C600E933A0 /* posy.bin in Resources */ = {isa = PBXBuildFile; fileRef = B03D18BC29E198C600E933A0 /* posy.bin */; };
+		B03D18CA29E1997000E933A0 /* Post.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03D18C529E1997000E933A0 /* Post.metal */; };
+		B03D18CB29E1997000E933A0 /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03D18C629E1997000E933A0 /* Scene.metal */; };
+		B03D18CC29E1997000E933A0 /* SH.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03D18C729E1997000E933A0 /* SH.metal */; };
+		B03D18CD29E1997000E933A0 /* Background.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03D18C829E1997000E933A0 /* Background.metal */; };
+		B03D18CE29E1997000E933A0 /* GI.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03D18C929E1997000E933A0 /* GI.metal */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B03D18A429E1984700E933A0 /* PBR_IBL_EDRMonitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PBR_IBL_EDRMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B03D18A729E1984700E933A0 /* PBR_IBL_EDRMonitorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PBR_IBL_EDRMonitorApp.swift; sourceTree = "<group>"; };
+		B03D18A929E1984700E933A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B03D18AB29E1984900E933A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B03D18AE29E1984900E933A0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B03D18B529E198C600E933A0 /* negy.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = negy.bin; path = ../../res/negy.bin; sourceTree = "<group>"; };
+		B03D18B629E198C600E933A0 /* Lenna.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = Lenna.bmp; path = ../../res/Lenna.bmp; sourceTree = "<group>"; };
+		B03D18B729E198C600E933A0 /* posx.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = posx.bin; path = ../../res/posx.bin; sourceTree = "<group>"; };
+		B03D18B829E198C600E933A0 /* Sailboat.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = Sailboat.bmp; path = ../../res/Sailboat.bmp; sourceTree = "<group>"; };
+		B03D18B929E198C600E933A0 /* posz.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = posz.bin; path = ../../res/posz.bin; sourceTree = "<group>"; };
+		B03D18BA29E198C600E933A0 /* negz.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = negz.bin; path = ../../res/negz.bin; sourceTree = "<group>"; };
+		B03D18BB29E198C600E933A0 /* negx.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = negx.bin; path = ../../res/negx.bin; sourceTree = "<group>"; };
+		B03D18BC29E198C600E933A0 /* posy.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = posy.bin; path = ../../res/posy.bin; sourceTree = "<group>"; };
+		B03D18C529E1997000E933A0 /* Post.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Post.metal; sourceTree = "<group>"; };
+		B03D18C629E1997000E933A0 /* Scene.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
+		B03D18C729E1997000E933A0 /* SH.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SH.metal; sourceTree = "<group>"; };
+		B03D18C829E1997000E933A0 /* Background.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Background.metal; sourceTree = "<group>"; };
+		B03D18C929E1997000E933A0 /* GI.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = GI.metal; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B03D18A129E1984700E933A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B03D189B29E1984700E933A0 = {
+			isa = PBXGroup;
+			children = (
+				B03D18A629E1984700E933A0 /* PBR_IBL_EDRMonitor */,
+				B03D18A529E1984700E933A0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B03D18A529E1984700E933A0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B03D18A429E1984700E933A0 /* PBR_IBL_EDRMonitor.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B03D18A629E1984700E933A0 /* PBR_IBL_EDRMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				B03D18C829E1997000E933A0 /* Background.metal */,
+				B03D18C929E1997000E933A0 /* GI.metal */,
+				B03D18C529E1997000E933A0 /* Post.metal */,
+				B03D18C629E1997000E933A0 /* Scene.metal */,
+				B03D18C729E1997000E933A0 /* SH.metal */,
+				B03D18B629E198C600E933A0 /* Lenna.bmp */,
+				B03D18BB29E198C600E933A0 /* negx.bin */,
+				B03D18B529E198C600E933A0 /* negy.bin */,
+				B03D18BA29E198C600E933A0 /* negz.bin */,
+				B03D18B729E198C600E933A0 /* posx.bin */,
+				B03D18BC29E198C600E933A0 /* posy.bin */,
+				B03D18B929E198C600E933A0 /* posz.bin */,
+				B03D18B829E198C600E933A0 /* Sailboat.bmp */,
+				B03D18A729E1984700E933A0 /* PBR_IBL_EDRMonitorApp.swift */,
+				B03D18A929E1984700E933A0 /* ContentView.swift */,
+				B03D18AB29E1984900E933A0 /* Assets.xcassets */,
+				B03D18AD29E1984900E933A0 /* Preview Content */,
+			);
+			path = PBR_IBL_EDRMonitor;
+			sourceTree = "<group>";
+		};
+		B03D18AD29E1984900E933A0 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				B03D18AE29E1984900E933A0 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B03D18A329E1984700E933A0 /* PBR_IBL_EDRMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B03D18B229E1984900E933A0 /* Build configuration list for PBXNativeTarget "PBR_IBL_EDRMonitor" */;
+			buildPhases = (
+				B03D18A029E1984700E933A0 /* Sources */,
+				B03D18A129E1984700E933A0 /* Frameworks */,
+				B03D18A229E1984700E933A0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PBR_IBL_EDRMonitor;
+			productName = PBR_IBL_EDRMonitor;
+			productReference = B03D18A429E1984700E933A0 /* PBR_IBL_EDRMonitor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B03D189C29E1984700E933A0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					B03D18A329E1984700E933A0 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+				};
+			};
+			buildConfigurationList = B03D189F29E1984700E933A0 /* Build configuration list for PBXProject "PBR_IBL_EDRMonitor" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B03D189B29E1984700E933A0;
+			productRefGroup = B03D18A529E1984700E933A0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B03D18A329E1984700E933A0 /* PBR_IBL_EDRMonitor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B03D18A229E1984700E933A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B03D18C129E198C600E933A0 /* posz.bin in Resources */,
+				B03D18C029E198C600E933A0 /* Sailboat.bmp in Resources */,
+				B03D18BE29E198C600E933A0 /* Lenna.bmp in Resources */,
+				B03D18C229E198C600E933A0 /* negz.bin in Resources */,
+				B03D18AF29E1984900E933A0 /* Preview Assets.xcassets in Resources */,
+				B03D18BD29E198C600E933A0 /* negy.bin in Resources */,
+				B03D18BF29E198C600E933A0 /* posx.bin in Resources */,
+				B03D18C329E198C600E933A0 /* negx.bin in Resources */,
+				B03D18C429E198C600E933A0 /* posy.bin in Resources */,
+				B03D18AC29E1984900E933A0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B03D18A029E1984700E933A0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B03D18AA29E1984700E933A0 /* ContentView.swift in Sources */,
+				B03D18CA29E1997000E933A0 /* Post.metal in Sources */,
+				B03D18CC29E1997000E933A0 /* SH.metal in Sources */,
+				B03D18CE29E1997000E933A0 /* GI.metal in Sources */,
+				B03D18CD29E1997000E933A0 /* Background.metal in Sources */,
+				B03D18CB29E1997000E933A0 /* Scene.metal in Sources */,
+				B03D18A829E1984700E933A0 /* PBR_IBL_EDRMonitorApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B03D18B029E1984900E933A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B03D18B129E1984900E933A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B03D18B329E1984900E933A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"PBR_IBL_EDRMonitor/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.PBR-IBL-EDRMonitor";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B03D18B429E1984900E933A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"PBR_IBL_EDRMonitor/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.PBR-IBL-EDRMonitor";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B03D189F29E1984700E933A0 /* Build configuration list for PBXProject "PBR_IBL_EDRMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B03D18B029E1984900E933A0 /* Debug */,
+				B03D18B129E1984900E933A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B03D18B229E1984900E933A0 /* Build configuration list for PBXNativeTarget "PBR_IBL_EDRMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B03D18B329E1984900E933A0 /* Debug */,
+				B03D18B429E1984900E933A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B03D189C29E1984700E933A0 /* Project object */;
+}
