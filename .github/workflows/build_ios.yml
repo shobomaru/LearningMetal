@@ -117,6 +117,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./ShadowMapIndirectCommandBuffer
+      - name: Build (SimpleCAMetalLayer)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./SimpleCAMetalLayer
       - name: Build (ShadowMapManualTracking)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
