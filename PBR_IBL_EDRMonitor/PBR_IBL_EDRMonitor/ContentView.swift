@@ -149,7 +149,6 @@ final class View2: MyView {
             layer.pixelFormat = .rgba16Float
         }
         else {
-            layer.wantsExtendedDynamicRangeContent = false
             layer.colorspace = CGColorSpace(name: CGColorSpace.sRGB)
             layer.pixelFormat = .rgba8Unorm
         }
@@ -181,6 +180,25 @@ final class View2: MyView {
     private var lock = NSLock()
 }
 
+class ContentView2Data {
+    @Binding private var status: String
+    init(_ status: Binding<String>) {
+        self._status = status
+        NotificationCenter.default.addObserver(self, selector: #selector(screenChanged), name: NSWindow.didChangeScreenNotification, object: nil)
+    }
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSWindow.didChangeScreenNotification, object: nil)
+    }
+    @objc private func screenChanged(_ notification: NSNotification) {
+        Task { @MainActor in
+            let edrVal: Double = NSScreen.main?.maximumExtendedDynamicRangeColorComponentValue.native ?? 0.0
+            let edrPot: Double = NSScreen.main?.maximumPotentialExtendedDynamicRangeColorComponentValue.native ?? 0.0
+            let fps: Int = NSScreen.main?.maximumFramesPerSecond ?? 0
+            status = ("MaxEdrValue = \(String(format: "%.2f", edrVal)), MaxEdrPotential = \(String(format: "%.2f", edrPot)), MaxFps = \(fps)")
+        }
+    }
+}
+
 struct ContentView2: MyViewRepresentable {
     #if os(macOS)
     typealias NSViewType = View2
@@ -189,11 +207,13 @@ struct ContentView2: MyViewRepresentable {
     @Binding private var message: String
     @Binding private var isShowAlert: Bool
     @Binding private var status: String
-    private var lock = NSLock()
+    private let lock = NSLock()
+    private let data: ContentView2Data
     init(message: Binding<String>, isShowAlert: Binding<Bool>, status: Binding<String>) {
         self._message = message
         self._isShowAlert = isShowAlert
         self._status = status
+        data = ContentView2Data(status)
     }
     func makeView(context: Context) -> View2 {
         View2()
@@ -203,12 +223,17 @@ struct ContentView2: MyViewRepresentable {
         myView.renderStart()
     }
     func makeCoordinator() -> Model {
-        Model(self)
+        return Model(self)
     }
     func enqueueAlert(_ message: String) {
         Task { @MainActor in
             self.message = message;
             self.isShowAlert = true
+        }
+    }
+    func updateStatusBar(_ message: String) {
+        Task { @MainActor in
+            self.status = message
         }
     }
 #if os(iOS)

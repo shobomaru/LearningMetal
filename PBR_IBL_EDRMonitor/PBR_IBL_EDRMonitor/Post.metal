@@ -52,14 +52,14 @@ fragment half4 postFS(Output input [[stage_in]],
     else
     {
         half3 color = colors.lightAccum.rgb;
-        half exposure = exp2(0.0); // fixed
+        half exposure = exp2(1.0); // fixed // Expect MaxEdrValue = 2.0 or over, otherwise luminance may be clamped
         if (!(isEDR)) {
             color = tonemapping(exposure * color) / tonemapping(TONEMAPPING_W).r;
             color = min(color, 65504);
             color = linearToSrgb(color);
         }
         else {
-            color = min(color, 65504);
+            color = min(color * exposure, 65504);
         }
         return half4(color, 1);
     }
