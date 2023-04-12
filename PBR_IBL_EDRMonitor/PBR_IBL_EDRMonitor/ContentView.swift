@@ -12,16 +12,38 @@ struct ContentView: View {
     @State private var isShowAlert = false
     @State private var status = "PBR_IBL_EDRMonitor"
     
+    #if !os(macOS)
+    let timer = Timer.publish(every: 0.25, on: .main, in: .common).autoconnect()
+    #endif
+    
     var body: some View {
         VStack {
             ContentView2(message: $message, isShowAlert: $isShowAlert, status: $status)
                 .alert(isPresented: $isShowAlert) { () -> Alert in
                     return Alert(title: Text("Error"), message: Text(message))
                 }
+                #if !os(macOS)
+                .onReceive(timer) { _ in
+                    self.viewCallback()
+                }
+                #endif
             Text(status)
         }
         .padding()
     }
+    
+    #if !os(macOS)
+    private func viewCallback() {
+        let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        guard let scene = scene else {
+            return
+        }
+        let val = scene.screen.currentEDRHeadroom
+        let pot = scene.screen.potentialEDRHeadroom
+        let fps = scene.screen.maximumFramesPerSecond
+        status = ("CurrentEdrHeadroom = \(String(format: "%.2f", val)), PotentialEdrHeadroom = \(String(format: "%.2f", pot)), MaxFps = \(fps)")
+    }
+    #endif
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -50,6 +72,7 @@ final class View2: MyView {
     private var metalLayer: CAMetalLayer?
     #if os(macOS)
     private var displayLink: CVDisplayLink?
+    public var screenCallback: Optional<() -> Void> = nil
     #else
     private var displayLink: CADisplayLink?
     #endif
@@ -89,6 +112,7 @@ final class View2: MyView {
         displayLink = CADisplayLink(target: self, selector: #selector(renderCallback))
         #endif
     }
+    
     public func renderStart() {
         if renderDelegate == nil {
             fatalError()
@@ -180,7 +204,8 @@ final class View2: MyView {
     private var lock = NSLock()
 }
 
-class ContentView2Data {
+#if os(macOS)
+final class ContentView2Data {
     @Binding private var status: String
     init(_ status: Binding<String>) {
         self._status = status
@@ -198,6 +223,11 @@ class ContentView2Data {
         }
     }
 }
+#else
+struct ContentView2Data {
+    init(_ status: Binding<String>) {}
+}
+#endif
 
 struct ContentView2: MyViewRepresentable {
     #if os(macOS)
