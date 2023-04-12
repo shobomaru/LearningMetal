@@ -73,6 +73,10 @@ jobs:
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
         working-directory: ./PBRCheckerboardRendering
+      - name: Build (PBR_IBL_EDRMonitor)
+        run: |
+          xcodebuild -configuration Release -sdk iphonesimulator
+        working-directory: ./PBR_IBL_EDRMonitor
       - name: Build (MeshShaderObjectShader)
         run: |
           xcodebuild -configuration Release -sdk iphonesimulator
