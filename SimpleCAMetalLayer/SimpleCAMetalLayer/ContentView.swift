@@ -40,14 +40,25 @@ protocol MyViewDelegate {
     func draw(in layer: CAMetalLayer)
 }
 
+final class MyLayerDelegate : NSObject, CALayerDelegate {
+    var callback: (CGSize) -> Void
+    init(callback: @escaping (CGSize) -> Void) {
+        self.callback = callback
+    }
+    func layoutSublayers(of layer: CALayer) { // resize callback
+        layer.sublayers?.forEach {
+            $0.frame = layer.bounds
+        }
+        let size = CGSizeMake(layer.bounds.width, layer.bounds.height)
+        callback(size)
+    }
+}
+
 final class View2: MyView {
     public var renderDelegate: MyViewDelegate?
     private var metalLayer: CAMetalLayer?
-    #if os(macOS)
-    private var displayLink: CVDisplayLink?
-    #else
     private var displayLink: CADisplayLink?
-    #endif
+    private var resizeCallback: MyLayerDelegate?
     
     public override init(frame frameRect: MyRect) {
         super.init(frame: frameRect)
@@ -58,31 +69,29 @@ final class View2: MyView {
         initInternal()
     }
     deinit {
-        #if os(macOS)
-        CVDisplayLinkStop(displayLink!)
-        NotificationCenter.default.removeObserver(self, name: NSView.frameDidChangeNotification, object: self)
-        #else
         displayLink!.isPaused = true
         displayLink!.invalidate()
-        #endif
     }
     private func initInternal() {
         #if os(macOS)
+        if #unavailable(macOS 14) {
+            fatalError("CAMetalLayer not supported in macOS 13.")
+            // CVDisplayLink is deprecated in macOS 15.
+        }
         wantsLayer = true
-        NotificationCenter.default.addObserver(self, selector: #selector(resizeCallback), name: NSView.frameDidChangeNotification, object: self)
-        var cvRet = CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
-        if (cvRet != kCVReturnSuccess) {
-            fatalError()
-        }
-        let selfPtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        cvRet = CVDisplayLinkSetOutputCallback(displayLink!, {displayLink, inNow, inOutputTime, flagsIn, fragsOut, displayLinksContext in return View2.renderCallback(displayLink, inNow, inOutputTime, flagsIn, fragsOut, displayLinksContext) }, selfPtr)
-        if (cvRet != kCVReturnSuccess) {
-            fatalError()
-        }
+        setupMetalLayer(self.layer as! CAMetalLayer)
+        displayLink = self.displayLink(target: self, selector: #selector(renderCallback))
         #else
         setupMetalLayer(self.layer as! CAMetalLayer)
         displayLink = CADisplayLink(target: self, selector: #selector(renderCallback))
         #endif
+        self.resizeCallback = MyLayerDelegate(callback: { [weak self] (size: CGSize) -> Void in
+            self!.lock.withLock {
+                self!.drawableSize = size
+                self!.isNewSize = true
+            }
+        })
+        self.layer!.delegate = self.resizeCallback!
     }
     public func renderStart() {
         if renderDelegate == nil {
@@ -92,24 +101,12 @@ final class View2: MyView {
         if drawableSize.width != 0 && drawableSize.height != 0 {
             renderDelegate!.myView(layer as! CAMetalLayer, drawableSizeWillChange: drawableSize)
         }
-        #if os(macOS)
-        CVDisplayLinkStart(displayLink!)
-        #else
         displayLink!.add(to: .current, forMode: .default)
-        #endif
     }
     
-    #if os(macOS)
-    private static func renderCallback(_ displayLink: CVDisplayLink, _ inNow: UnsafePointer<CVTimeStamp>, _ inOutputTime: UnsafePointer<CVTimeStamp>, _ flagsIn: CVOptionFlags, _ fragsOut: UnsafeMutablePointer<CVOptionFlags>, _ displayLinksContext: UnsafeMutableRawPointer?) -> CVReturn {
-        let view2 = unsafeBitCast(displayLinksContext, to: View2.self) // retain
-        view2.renderOnce()
-        return kCVReturnSuccess
-    }
-    #else
     @objc private func renderCallback(displayLink: CADisplayLink) {
         renderOnce()
     }
-    #endif
     private func renderOnce() {
         if drawableSize.width == 0 || drawableSize.height == 0 {
             return
@@ -144,26 +141,23 @@ final class View2: MyView {
         metalLayer = layer // NSView.layer cannot touch from non UI thread when drawing asynchronously, so we save it now
     }
     
-    #if os(macOS)
-    @objc private func resizeCallback(_ notification: Notification) {
-        if notification.object as? Self == self {
-            metalLayer!.drawableSize = CGSizeMake(self.frame.size.width, self.frame.size.height)
-            lock.withLock {
-                drawableSize = CGSizeMake(self.frame.size.width, self.frame.size.height)
-                isNewSize = true
+    /*final class MyLayerDelegate : NSObject, CALayerDelegate {
+        func layoutSublayers(of layer: CALayer) { // resize callback
+            layer.sublayers?.forEach {
+                $0.frame = layer.bounds
             }
         }
-    }
-    #else
-    override func layoutSublayers(of layer: CALayer) {
-        super.layoutSublayers(of: layer)
-        metalLayer!.drawableSize = CGSizeMake(bounds.width, bounds.height)
+    }*/
+    /*func layoutSublayers(of layer: CALayer) {
+        metalLayer!.drawableSize = CGSizeMake(layer.bounds.width, layer.bounds.height)
         lock.withLock {
-            drawableSize = CGSizeMake(bounds.width, bounds.height)
+            drawableSize = CGSizeMake(layer.bounds.width, layer.bounds.height)
             isNewSize = true
         }
-    }
-    #endif
+        layer.sublayers?.forEach {
+            $0.frame = layer.bounds
+        }
+    }*/
     public private(set) var drawableSize: CGSize = CGSizeMake(0, 0)
     public private(set) var isNewSize = false
     private var lock = NSLock()
