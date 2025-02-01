@@ -2,6 +2,8 @@ import SwiftUI
 import MetalKit
 import simd
 
+let ICB_USE_GPU = true
+
 struct ContentView: View {
     @State private var message = "default"
     @State private var isShowAlert = false
@@ -419,20 +421,41 @@ class Metal: NSObject, MTKViewDelegate {
         blitEnc.endEncoding()
         #endif
         
-        let csEnc = cmdBuf.makeComputeCommandEncoder()!
-        csEnc.label = "GpuCommandBuffer"
-        csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
-        csEnc.setComputePipelineState(self.resource.psoICB!)
-        csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
-        csEnc.setBytes([UInt32(frameIndex)], length: MemoryLayout<UInt32>.size, index: 1)
-        csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 2)
-        csEnc.dispatchThreads(MTLSizeMake(icbSize, 1, 1), threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
-        csEnc.endEncoding()
+        if ICB_USE_GPU {
+            let csEnc = cmdBuf.makeComputeCommandEncoder()!
+            csEnc.label = "GpuCommandBuffer"
+            csEnc.useResource(icb, usage: .write) // Exists in the argument buffer
+            csEnc.setComputePipelineState(self.resource.psoICB!)
+            csEnc.setBuffer(self.resource.icbArgScene[frameIndex], offset: 0, index: 0)
+            csEnc.setBytes([UInt32(frameIndex)], length: MemoryLayout<UInt32>.size, index: 1)
+            csEnc.setBytes([UInt32(6 * SPHERE_SLICES * SPHERE_STACKS), UInt32(6)], length: MemoryLayout<UInt32>.size * 2, index: 2)
+            csEnc.dispatchThreads(MTLSizeMake(icbSize, 1, 1), threadsPerThreadgroup: MTLSizeMake(1, 1, 1))
+            csEnc.endEncoding()
+        } else {
+            // Emulate GpuCommandBuffer.metal
+            for i in 0..<2 {
+                let cmd = icb.indirectRenderCommandAt(i)
+                if i == 0 {
+                    cmd.setVertexBuffer(self.resource.vb, offset: 0, at: 0)
+                } else {
+                    cmd.setVertexBuffer(self.resource.vbPlane, offset: 0, at: 0)
+                }
+                cmd.setVertexBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
+                cmd.setFragmentBuffer(self.resource.argScene[frameIndex], offset: 0, at: 1)
+                if i == 0 {
+                    cmd.drawIndexedPrimitives(.triangle, indexCount: Int(UInt32(6 * SPHERE_SLICES * SPHERE_STACKS)), indexType: .uint16, indexBuffer: self.resource.ib, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 0)
+                } else {
+                    cmd.drawIndexedPrimitives(.triangle, indexCount: 6, indexType: .uint16, indexBuffer: self.resource.ibPlane, indexBufferOffset: 0, instanceCount: 1, baseVertex: 0, baseInstance: 0)
+                }
+            }
+        }
         
-        blitEnc = cmdBuf.makeBlitCommandEncoder()!
-        blitEnc.label = "Optimize GpuCommand Buffer"
-        blitEnc.optimizeIndirectCommandBuffer(icb, range: 0..<icbSize)
-        blitEnc.endEncoding()
+        if ICB_USE_GPU {
+            blitEnc = cmdBuf.makeBlitCommandEncoder()!
+            blitEnc.label = "Optimize GpuCommand Buffer"
+            blitEnc.optimizeIndirectCommandBuffer(icb, range: 0..<icbSize)
+            blitEnc.endEncoding()
+        }
         
         // Draw
         
