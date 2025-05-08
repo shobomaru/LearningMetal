@@ -13,7 +13,6 @@
 		B03EE7A32C5004DA006188BF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B03EE7A22C5004DA006188BF /* Preview Assets.xcassets */; };
 		B03EE7AA2C50052B006188BF /* Scene.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03EE7A92C50052B006188BF /* Scene.metal */; };
 		B03EE7AC2C500548006188BF /* Shadow.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03EE7AB2C500548006188BF /* Shadow.metal */; };
-		B03EE7AE2C50058B006188BF /* GpuCommandBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = B03EE7AD2C50058B006188BF /* GpuCommandBuffer.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,7 +24,6 @@
 		B03EE7A22C5004DA006188BF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B03EE7A92C50052B006188BF /* Scene.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Scene.metal; sourceTree = "<group>"; };
 		B03EE7AB2C500548006188BF /* Shadow.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shadow.metal; sourceTree = "<group>"; };
-		B03EE7AD2C50058B006188BF /* GpuCommandBuffer.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GpuCommandBuffer.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,7 +63,6 @@
 				B03EE7A12C5004DA006188BF /* Preview Content */,
 				B03EE7A92C50052B006188BF /* Scene.metal */,
 				B03EE7AB2C500548006188BF /* Shadow.metal */,
-				B03EE7AD2C50058B006188BF /* GpuCommandBuffer.metal */,
 			);
 			path = ShadowMapResidenySet;
 			sourceTree = "<group>";
@@ -148,7 +145,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B03EE7AE2C50058B006188BF /* GpuCommandBuffer.metal in Sources */,
 				B03EE79D2C5004D9006188BF /* ContentView.swift in Sources */,
 				B03EE79B2C5004D9006188BF /* ShadowMapResidenySetApp.swift in Sources */,
 				B03EE7AA2C50052B006188BF /* Scene.metal in Sources */,
@@ -282,6 +278,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ShadowMapResidenySet/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -318,6 +315,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ShadowMapResidenySet/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

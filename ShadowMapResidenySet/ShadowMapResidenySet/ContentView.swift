@@ -29,7 +29,7 @@ typealias MyViewRepresentable = UIViewRepresentable
 #else
 typealias MyViewRepresentable = NSViewRepresentable
 #endif
-@available(iOS 18.0, *)
+@available(macOS 15.0, iOS 18.0, *)
 struct ContentView2: MyViewRepresentable {
     typealias NSViewType = MTKView
     typealias Coordinator = Metal
@@ -70,7 +70,7 @@ struct ContentView2: MyViewRepresentable {
     #endif
 }
 
-@available(iOS 18.0, *)
+@available(macOS 15.0, iOS 18.0, *)
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
@@ -168,7 +168,7 @@ struct SceneMetalArgs {
     }
 }
 
-@available(iOS 18.0, *) // for MTLResidencySet
+@available(macOS 15.0, iOS 18.0, *) // for MTLResidencySet
 class MyResource {
     static let ShadowSize: Int = 512
     var pso: MTLRenderPipelineState?
@@ -331,7 +331,7 @@ class MyResource {
 let SPHERE_STACKS: Int = 10
 let SPHERE_SLICES: Int = 12
 
-@available(iOS 18.0, *)
+@available(macOS 15.0, iOS 18.0, *)
 class Metal: NSObject, MTKViewDelegate {
     var parent: ContentView2
     var frameCount: UInt64 = 0
